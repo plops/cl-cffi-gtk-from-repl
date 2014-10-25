@@ -92,6 +92,8 @@ signal canvas."
 					 :hscrollbar-policy :automatic
 					 :vscrollbar-policy :automatic))
 		(canvas (make-instance 'gtk-drawing-area)))
+	    (defparameter *paned* paned)
+	    (defparameter *canvas* canvas)
 	    (g-signal-connect canvas "draw"
 			      (lambda (widget cr)
 				(funcall *draw-canvas* widget cr)))
@@ -99,7 +101,7 @@ signal canvas."
 	    (setf (gtk-widget-size-request canvas) (list 1024 1024))
 	    (gtk-container-add window paned)
 	    (gtk-paned-add1 paned scrolled)
-	    (defparameter *paned* paned)
+	    
 	    (let* ((vbox (make-instance 'gtk-box :orientation :vertical)))
 	      (add-spinbox-to-vbox vbox 'xpos 100 1024 canvas)
 	      (add-spinbox-to-vbox vbox 'ypos 150 1024 canvas)
@@ -111,18 +113,26 @@ signal canvas."
 #+nil
 (run)
 
+
+#+nil
+(gtk-container-get-children *paned*) ;; => (#<GTK-SCROLLED-WINDOW {100A865843}> #<GTK-BOX {100A9F7583}>)
+
+#+nil
+(second (gtk-container-get-children *paned*))
+
 #+nil
 (gtk-widget-destroy (second (gtk-container-get-children *paned*)))
+
 #+nil
-(let* ((vbox (make-instance 'gtk-box :orientation :vertical))
-       (xpos (spin-box 'xpos 100 1024 canvas))
-       (ypos (spin-box 'ypos 150 1024 canvas))
-       (radius (spin-box 'radius 50 500 canvas))
-       (angle (spin-box 'angle 0 360 canvas)))
-  (loop for (name . widget) in *control-widgets* do
-       (gtk-box-pack-start vbox widget))
-  
-  (gtk-paned-add2 paned vbox))
+(let* ((vbox (make-instance 'gtk-box :orientation :vertical)))
+  (add-spinbox-to-vbox vbox 'xpos 100 1024 *canvas*)
+  (add-spinbox-to-vbox vbox 'ypos 154 1024 *canvas*)
+  (add-spinbox-to-vbox vbox 'radius 50 500 *canvas*)
+  (add-spinbox-to-vbox vbox 'angle 30 360 *canvas*)
+  (gtk-paned-add2 *paned* vbox)
+  (gtk-widget-show-all *paned*))
+
+
 #+nil
 (gtk-paned-add2 *paned* vbox)
 

@@ -7,10 +7,14 @@
 (in-package :myg)
 
 
-(defun spin-button-value (widget-name)
-  (let ((hbox-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))
+(defun spin-button-value (name)
+  "Return the adjustment value of the spin-button that is labeled with NAME."
+  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name 'xpos) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))))
     (when hbox-children
      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
+
+
+
 
 
 (mapcar #'gtk-label-get-text (mapcar #'first (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*))))))
@@ -55,7 +59,7 @@ button right of it and add it to container. Changing a value will
 signal canvas."
   (let* ((hb (make-instance 'gtk-box :orientation :horizontal))
 	 (lab (make-instance 'gtk-label
-			     :label (format nil "~s" name)))
+			     :label (symbol-name name)))
 	 (adj (make-instance 'gtk-adjustment
 			     :value (* 1d0 value)
 			     :lower 0d0

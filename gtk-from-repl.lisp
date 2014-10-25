@@ -6,12 +6,15 @@
 
 (in-package :myg)
 
-(defparameter *control-widgets* nil)
 
 (defun spin-button-value (widget-name)
-  (let ((hbox-children (gtk-container-get-children (cdr (assoc widget-name *control-widgets*)))))
+  (let ((hbox-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))
     (when hbox-children
      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
+
+
+(mapcar #'gtk-label-get-text (mapcar #'first (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*))))))
+
 
 (progn
   (defun draw-canvas (widget cr)
@@ -137,9 +140,9 @@ signal canvas."
 (gtk-paned-add2 *paned* vbox)
 
 #+nil
-(gtk-widget-destroy *vbox*)
-#+nil
-(gtk-widget-destroy (first (gtk-container-get-children *frame1*)))
+(progn
+  (setf *control-widgets* nil)
+  (gtk-widget-destroy (first (gtk-container-get-children *frame1*))))
 
 #+nil
 (let ((vbox (make-instance 'gtk-box :orientation :vertical)))

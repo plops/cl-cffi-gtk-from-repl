@@ -9,16 +9,12 @@
 
 (defun spin-button-value (name)
   "Return the adjustment value of the spin-button that is labeled with NAME."
-  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name 'xpos) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))))
+  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name name) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))))
     (when hbox-children
      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
-
-
-
-
-(mapcar #'gtk-label-get-text (mapcar #'first (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*))))))
-
+#+nil
+(spin-button-value 'ypos)
 
 (progn
   (defun draw-canvas (widget cr)
@@ -27,24 +23,23 @@
       (cairo-set-source-rgb cr 1.0 1.0 1.0)
       (cairo-scale cr 1 1)
       (cairo-paint cr)     
-      (when *control-widgets*
-	(let* ((radius (or (spin-button-value 'radius) 100d0))
-	       (angle (* (/ pi 180) (or (spin-button-value 'angle) 1d0)))
-	       (x (or (spin-button-value 'xpos) 100d0))
-	       (y (or (spin-button-value 'ypos) 80d0)))
-	  (cairo-arc cr x y radius 0 (* 2 pi))
+      (let* ((radius (or (spin-button-value 'radius) 100d0))
+	     (angle (* (/ pi 180) (or (spin-button-value 'angle) 1d0)))
+	     (x (or (spin-button-value 'xpos) 100d0))
+	     (y (or (spin-button-value 'ypos) 80d0)))
+	(cairo-arc cr x y radius 0 (* 2 pi))
 					;(cairo-set-source-rgb cr 1 1 1)
 					;(cairo-fill-preserve cr)
-	  (cairo-set-source-rgb cr 1 0 1)
-	  (cairo-stroke cr)
-	  (cairo-save cr)
-	  (cairo-set-source-rgb cr 1 0 0)
-	  (cairo-move-to cr x y)
-	  (cairo-line-to cr
-			 (+ x (* radius (sin angle)))
-			 (+ y (* radius (- (cos angle)))))
-	  (cairo-stroke cr)
-	  (cairo-restore cr)))
+	(cairo-set-source-rgb cr 1 0 1)
+	(cairo-stroke cr)
+	(cairo-save cr)
+	(cairo-set-source-rgb cr 1 0 0)
+	(cairo-move-to cr x y)
+	(cairo-line-to cr
+		       (+ x (* radius (sin angle)))
+		       (+ y (* radius (- (cos angle)))))
+	(cairo-stroke cr)
+	(cairo-restore cr))
       (cairo-destroy cr)
       t))
   (defparameter *draw-canvas* #'draw-canvas))

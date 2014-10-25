@@ -1,3 +1,33 @@
+;; How to develop a GTK graphical user interface with Common Lisp and
+;; ease Ich beschaeftige mich hauptsaechlich mit Computeralgorithmen
+;; zur Bildverarbeitung und brauche daher eine einfache Moeglichkeit
+;; Bilder und Animationen anzuzeigen. Meine bisherigen Versuche mit
+;; den offenen Bibliotheken LTK (Lisp binding fuer die Tk library),
+;; mcclim oder common-qt einzusetzen sind leider gescheitert.
+
+;; Vor einiger Zeit entdeckte ich cl-cffi-gtk. Das ist ein Binding um
+;; GTK+ 3 von Common Lisp aus aufzurufen. Nach einigen Experimentieren
+;; bin ich jetzt an einem Punkt angelangt wo ich damit effizient
+;; graphische Oberflaechen erstellen kann. Dabei finde ich wichtig,
+;; dass ich das GUI Widgets zur Laufzeit ersetzen kann, ohne das Lisp
+;; Image neu starten zu muessen.
+
+;; Obwohl cl-cffi-gtk einen sehr umfangreichen Teil der GTK+
+;; Bibliothek abdeckt fehlte ein fuer mich sehr wichtiger Teil, um
+;; meine eigenen Daten in eine Cairo Surface zu laden. Dafuer sind
+;; aber nur zwei Funktionen noetig deren Interface ich in diesem Patch
+;; deklariere
+;; https://github.com/plops/cl-cffi-gtk/commit/8eda1c404bcd6c10140103ea6332404cf9b357b0
+;; Um den folgenden Code einfach zu halten, werde ich jedoch von
+;; diesen Funktionen erstmal keinen Gebrauch machen.
+
+;; Zunaechst einmal muss dass Packet cl-cffi-gtk geladen werden und
+;; ich definiere ein Packet myg, in dem ich meinen Code schreibe.  Ich
+;; strukturiere meinen Quellcode so, dass die Datei in einer Emacs
+;; session mit laufendem Slime mit der Tastenkombination C-c C-k
+;; compiliert werden kann.
+
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (ql:quickload :cl-cffi-gtk))
 

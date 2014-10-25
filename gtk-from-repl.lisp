@@ -6,10 +6,12 @@
 
 (in-package :myg)
 
+(defparameter *canvas* nil)
+(defparameter *paned* nil)
 
-(defun spin-button-value (name)
+(defun spin-button-value (name paned)
   "Return the adjustment value of the spin-button that is labeled with NAME."
-  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name name) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children *paned*)))))))
+  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name name) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children paned)))))))
     (when hbox-children
      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
@@ -23,10 +25,10 @@
       (cairo-set-source-rgb cr 1.0 1.0 1.0)
       (cairo-scale cr 1 1)
       (cairo-paint cr)     
-      (let* ((radius (or (spin-button-value 'radius) 100d0))
-	     (angle (* (/ pi 180) (or (spin-button-value 'angle) 1d0)))
-	     (x (or (spin-button-value 'xpos) 100d0))
-	     (y (or (spin-button-value 'ypos) 80d0)))
+      (let* ((radius (or (spin-button-value 'radius *paned*) 100d0))
+	     (angle (* (/ pi 180) (or (spin-button-value 'angle *paned*) 1d0)))
+	     (x (or (spin-button-value 'xpos *paned*) 100d0))
+	     (y (or (spin-button-value 'ypos *paned*) 80d0)))
 	(cairo-arc cr x y radius 0 (* 2 pi))
 					;(cairo-set-source-rgb cr 1 1 1)
 					;(cairo-fill-preserve cr)
@@ -44,9 +46,6 @@
       t))
   (defparameter *draw-canvas* #'draw-canvas))
 
-
-
-(defparameter *canvas* nil)
 
 (defun add-spinbox-to-vbox (container name value upper canvas)
   "Make a horizontal box containing a label on the left and a spin
@@ -94,8 +93,8 @@ signal canvas."
 					 :hscrollbar-policy :automatic
 					 :vscrollbar-policy :automatic))
 		(canvas (make-instance 'gtk-drawing-area)))
-	    (defparameter *paned* paned)
-	    (defparameter *canvas* canvas)
+	    (setf *paned* paned
+		  *canvas* canvas)
 	    (g-signal-connect canvas "draw"
 			      (lambda (widget cr)
 				(funcall *draw-canvas* widget cr)))
@@ -120,9 +119,6 @@ signal canvas."
 (gtk-container-get-children *paned*) ;; => (#<GTK-SCROLLED-WINDOW {100A865843}> #<GTK-BOX {100A9F7583}>)
 
 #+nil
-(second (gtk-container-get-children *paned*))
-
-#+nil
 (gtk-widget-destroy (second (gtk-container-get-children *paned*)))
 
 #+nil
@@ -134,37 +130,3 @@ signal canvas."
   (gtk-paned-add2 *paned* vbox)
   (gtk-widget-show-all *paned*))
 
-
-#+nil
-(gtk-paned-add2 *paned* vbox)
-
-#+nil
-(progn
-  (setf *control-widgets* nil)
-  (gtk-widget-destroy (first (gtk-container-get-children *frame1*))))
-
-#+nil
-(let ((vbox (make-instance 'gtk-box :orientation :vertical)))
-  (defparameter *vbox* vbox)
-  (loop for (name widget) in `((rb-ft ,(gtk-check-button-new-with-label "ft"))
-			       (rb-fit ,(gtk-check-button-new-with-label "fit"))
-			       (rb-bla ,(gtk-check-button-new-with-label "bla"))
-			       (rb-bla2 ,(gtk-check-button-new-with-label "bla2"))) do
-       (gtk-box-pack-start vbox widget))
-  (gtk-container-add *frame1* vbox))
-
-
-
-
-#+nil
-(list *vbox*
-      (gtk-container-get-children *frame1*))
-
-#+nil
-(gtk-container-get-children *vbox*)
-
-
-#+nil
-(gtk-widget-show-all *frame1*)
-#+nil
-(gtk-widget-show-all *vbox*)

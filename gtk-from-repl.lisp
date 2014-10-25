@@ -36,6 +36,12 @@
 
 (in-package :myg)
 
+;; Wie dem Screenshot zu entnehmen ist, soll das Fenster auf der
+;; linken Seite einen Cairo Canvas zeigen. Darin male ich einen Kreis
+;; dessen Mittelpunktskoordinaten und Radius durch GUI Elemente auf
+;; der rechten Seite des Fensters eingestellt werden koennen.
+ 
+
 (defparameter *canvas* nil)
 (defparameter *paned* nil)
 
@@ -109,8 +115,8 @@ signal canvas."
   (sb-int:with-float-traps-masked (:divide-by-zero)
     (within-main-loop
       (let ((window (make-instance 'gtk-window :title "myg-window"
-				   :default-width 640
-				   :default-height 480
+				   :default-width 580
+				   :default-height 200
 				   :border-width 12
 				   :type :toplevel)))
 	(g-signal-connect window "destroy"
@@ -134,8 +140,8 @@ signal canvas."
 	    (gtk-paned-add1 paned scrolled)
 	    
 	    (let* ((vbox (make-instance 'gtk-box :orientation :vertical)))
-	      (add-spinbox-to-vbox vbox 'xpos 100 1024 canvas)
-	      (add-spinbox-to-vbox vbox 'ypos 150 1024 canvas)
+	      (add-spinbox-to-vbox vbox 'xpos 70 1024 canvas)
+	      (add-spinbox-to-vbox vbox 'ypos 80 1024 canvas)
 	      (add-spinbox-to-vbox vbox 'radius 50 500 canvas)
 	      (add-spinbox-to-vbox vbox 'angle 0 360 canvas)
 	      (gtk-paned-add2 paned vbox))))

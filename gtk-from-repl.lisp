@@ -27,13 +27,11 @@
 
 (in-package :myg)
 
-
-;; GTK+ ist eine C Library die seine Inhalte auf eine
-;; objektorientierte Art vorhaelt. Insbesonder sind die Widgets als CLOS
-;; Klassen instanzierbar und ihre Parameter koennen entweder bei der
-;; Instanzierung oder spaeter gesetzt werden. Die folgende Funktion
-;; run-0 enthaelt minimalen Code um ein Fenster ohne weitere Widgets
-;; zu erstellen.
+;; While GTK+ is a C library its interface is object-oriented. In
+;; cl-cffi-gtk the widgets are CLOS classes classes and their
+;; parameters can be defined either during instantiation or later
+;; using various methods. The following function run-0 contains
+;; minimal code to create a window without any widgets.
 
 (defun run-0 ()
   (sb-int:with-float-traps-masked (:divide-by-zero)
@@ -52,11 +50,12 @@
 #+nil
 (run-0)
 
-;; Die Instanz window emittiert das Signal "destroy", wenn das Fenster
-;; vom Window manager aus geschlossen wird. Mit der hier lambda
-;; Funktion wird das Programm in diesem Fall abgebrochen.
+;; When the user closes the application window using the window
+;; manager, the instance window emits the "destroy" signal. The lambda
+;; function in the previous code will leave the main applications main
+;; loop and shut down the program (but not the lisp image).
 
-;; In run-1 wird ein Button zum Fenster window hinzugefuegt.
+;; The following function run-1 shows how to add a button to the window.
 
 (defun run-1 ()
   (sb-int:with-float-traps-masked (:divide-by-zero)

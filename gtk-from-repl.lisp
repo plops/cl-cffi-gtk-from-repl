@@ -472,28 +472,28 @@ signal canvas."
     (when hbox-children
       (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
-;; Ein Beispielaufruf ist der Folgende:
+;; An example call would be:
 
 #+nil
 (spin-button-value 'ypos *paned*) ;; => 75.0
 
-
-;; Durch Aufruf von run-4 wird das Fenster mit dem Cairo Canvas
-;; geoeffnet, das im Screenshot dargestellt ist.
+;; Calling the function run-4 will open a window with the cairo canvas
+;; as shown in the screenshot.
 
 #+nil
 (run-4)
 
-;; Der folgende Aufruf hangelt sich von *paned* zur vertikalen Box und
-;; l\"oscht alle darin enthaltenen Widgets. Uebrig bleibt nur der
-;; Cairo Canvas.
+;; Now I describe how I can interactively modify the GUI. The
+;; following call starts from the widget object *paned* and goes to
+;; its second child, which is the vertical box containing the spin
+;; boxes. It then destroys all those widgets. The window then only
+;; shows the cairo canvas.
 
 #+nil
 (gtk-widget-destroy (second (gtk-container-get-children *paned*)))
 
-;; Durch den folgenden Aufruf werden in der laufenden GTK Applikation
-;; wieder Spinboxen erzeugt. Die jedoch mit anderen Defaultwerten
-;; initialisiert sind:
+;; The following call can be issued to produce new spin boxes, albeit
+;; with different default values:
 
 #+nil
 (let* ((vbox (make-instance 'gtk-box :orientation :vertical)))
@@ -504,8 +504,8 @@ signal canvas."
   (gtk-paned-add2 *paned* vbox)
   (gtk-widget-show-all *paned*))
 
-;; Auf diese Weise kann man zum Beispiel auch zusaetzliche Spinboxen
-;; mit anderen Labeltexten als XPOS, YPOS, RADIUS oder ANGLE erzeugen
-;; und damit neue Objekte in draw-canvas zeichnen.
+;; In this way, you can create additional spin boxes with other label
+;; texts than XPOS, YPOS, RADIUS or ANGLE and use them to control
+;; other objects in the canvas.
 
 

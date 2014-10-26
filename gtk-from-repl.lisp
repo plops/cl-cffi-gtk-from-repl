@@ -27,10 +27,6 @@
 
 (in-package :myg)
 
-;; Wie dem Screenshot zu entnehmen ist, soll das Fenster auf der
-;; linken Seite einen Cairo Canvas zeigen. Darin male ich einen Kreis
-;; dessen Mittelpunktskoordinaten und Radius durch GUI Elemente auf
-;; der rechten Seite des Fensters eingestellt werden koennen.
 
 ;; GTK+ ist eine C library die seine Inhalte auf eine
 ;; objektorientierte vorhaelt. Insbesonder sind die Widgets als CLOS
@@ -287,10 +283,22 @@
 #+nil
 (run-3)
 
-;; Die Funktion run-3 ist damit die erste halbwegs vernuenftige Applikation.
+;; Die Funktion run-3 ist damit die erste halbwegs vernuenftige GTK Applikation.
 
 
+;; Jetzt moechte ich eine interessantere Applikation bauen.  Wie dem
+;; Screenshot zu entnehmen ist, soll das Fenster auf der linken Seite
+;; einen Cairo Canvas zeigen. Darin male ich einen Kreis dessen
+;; Mittelpunktskoordinaten und Radius durch GUI Elemente auf der
+;; rechten Seite des Fensters eingestellt werden koennen.
 
+;; Ein gtk-paned hat zwei Seiten und einen variablen schieber
+;; dazwischen. Ich nutze dieses Element als hoechstes Element unter
+;; dem Fenster um die Widgets anzuordnen. Damit ich spaeter auf diese
+;; Widgets zugreifen kann. Speichere ich die Paned Instanz in der
+;; globalen Variable *paned*. Weiterhin ist es nuetzlich eine globale
+;; Variable mit dem Cairo Canvas zu haben, so dass neue
+;; Kontrollwidgets sehr einfach einen redraw erzwingen koennen.
 
 (defparameter *paned* nil)
 (defparameter *canvas* nil)

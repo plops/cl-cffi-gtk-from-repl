@@ -354,6 +354,7 @@
 ;; werden. Da die aber bisher noch nicht definiert ist, schreibe ich
 ;; erstmal folgende Platzhalterfunktion. 
 
+#+nil
 (defun spin-button-value (name paned)
   "Return the adjustment value of the spin-button that is labeled with NAME."
   nil)
@@ -367,9 +368,15 @@
 ;; analysiert werden koennen. Bei Programmierung mit C waere eine
 ;; derartige Vorgehensweise undenkbar.
 
+;; Die Funktion run-4 baut nun wie vorher das GUI Fenster auf. Als
+;; erstes wird ein Hauptfenster (top-level window) erstellt. Darin ein
+;; Paned Objekt, dass das Fenster vertikal in zwei Teile teilt. Links
+;; kommt der Cairo Canvas hin. Dessen Groesse wird auf 1024x1024
+;; gesetzt und ich packe ein scrolled-window drumherum um scrollbars
+;; zu haben. Auf die rechte Seite des Paned kommt eine Box mit
+;; vertikal angeordneten Spinboxen. 
 
-
-(defun run ()
+(defun run-4 ()
   (sb-int:with-float-traps-masked (:divide-by-zero)
     (within-main-loop
       (let ((window (make-instance 'gtk-window :title "myg-window"
@@ -404,6 +411,8 @@
 	      (add-spinbox-to-vbox vbox 'angle 0 360 canvas)
 	      (gtk-paned-add2 paned vbox))))
 	(gtk-widget-show-all window)))))
+
+;; 
 
 (defun add-spinbox-to-vbox (container name value upper canvas)
   "Make a horizontal box containing a label on the left and a spin
@@ -450,7 +459,7 @@ signal canvas."
 
 
 #+nil
-(run)
+(run-4)
 
 
 #+nil

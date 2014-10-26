@@ -87,25 +87,131 @@
 ;; Ueberblick ueber moegliche Signal bekomme ich fuer gewoehnlich mit
 ;; Glade (siehe rechte untere Ecke im Screenshot).
 
-(defun run-1 ()
-  (sb-int:with-float-traps-masked (:divide-by-zero)
-    (within-main-loop
-      (let ((window (make-instance 'gtk-window :title "myg-window"
-				   :default-width 580
-				   :default-height 200
-				   :border-width 12
-				   :type :toplevel)))
-	(g-signal-connect window "destroy"
-			  (lambda (widget)
-			    (declare (ignorable widget))
-			    (leave-gtk-main)))
-	(let ((button (make-instance 'gtk-button :label "test")))
-	  (gtk-container-add window button)
-	  (g-signal-connect window "clicked"
+(progn
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defparameter *button* nil)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defun run-2 ()
+    (sb-int:with-float-traps-masked (:divide-by-zero)
+      (within-main-loop
+	(let ((window (make-instance 'gtk-window :title "myg-window"
+				     :default-width 580
+				     :default-height 200
+				     :border-width 12
+				     :type :toplevel)))
+	  (g-signal-connect window "destroy"
 			    (lambda (widget)
 			      (declare (ignorable widget))
-			      (setf (gtk-button-)))))
-	(gtk-widget-show-all window)))))
+			      (leave-gtk-main)))
+	  (let ((button (make-instance 'gtk-button :label "test")))
+	    (gtk-container-add window button)
+	    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	    (setf *button* button)
+	    (g-signal-connect button "clicked"
+			      (lambda (widget)
+				(declare (ignorable widget))
+				(format t "button has been clicked~%")))
+	    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	    )
+	  (gtk-widget-show-all window))))))
+
+#+nil
+(run-2)
+
+
+;; In run-2 speichere ich das Objekt button in einer globalen Variable
+;; *button*. Der Slime Inspector (C-c C-I) zeigt fuer dieses Objekt
+;; den folgenden Inhalt an.
+
+;; #<GTK-BUTTON {100C50D883}>
+;; --------------------
+;; Class: #<GOBJECT-CLASS GTK-BUTTON>
+;; --------------------
+;;  Group slots by inheritance [ ]
+;;  Sort slots alphabetically  [X]
+
+;; All Slots:
+;; [ ]  ACTION-NAME           = NIL
+;; [ ]  ACTION-TARGET         = #.(SB-SYS:INT-SAP #X00000000)
+;; [ ]  ALWAYS-SHOW-IMAGE     = NIL
+;; [ ]  APP-PAINTABLE         = NIL
+;; [ ]  BORDER-WIDTH          = 0
+;; [ ]  CAN-DEFAULT           = NIL
+;; [ ]  CAN-FOCUS             = T
+;; [ ]  CHILD                 = #<unbound>
+;; [ ]  COMPOSITE-CHILD       = NIL
+;; [ ]  DOUBLE-BUFFERED       = T
+;; [ ]  EVENTS                = NIL
+;; [ ]  EXPAND                = NIL
+;; [ ]  FOCUS-ON-CLICK        = T
+;; [ ]  HALIGN                = :FILL
+;; [ ]  HAS-DEFAULT           = NIL
+;; [ ]  HAS-FOCUS             = NIL
+;; [ ]  HAS-REFERENCE         = T
+;; [ ]  HAS-TOOLTIP           = NIL
+;; [ ]  HEIGHT-REQUEST        = -1
+;; [ ]  HEXPAND               = NIL
+;; [ ]  HEXPAND-SET           = NIL
+;; [ ]  IMAGE                 = NIL
+;; [ ]  IMAGE-POSITION        = :LEFT
+;; [ ]  IS-FOCUS              = T
+;; [ ]  LABEL                 = "test"
+;; [ ]  MARGIN                = 0
+;; [ ]  MARGIN-BOTTOM         = 0
+;; [ ]  MARGIN-LEFT           = 0
+;; [ ]  MARGIN-RIGHT          = 0
+;; [ ]  MARGIN-TOP            = 0
+;; [ ]  NAME                  = ""
+;; [ ]  NO-SHOW-ALL           = NIL
+;; [ ]  OPACITY               = 1.0d0
+;; [ ]  PARENT                = #<GTK-WINDOW {100DE8AEE3}>
+;; [ ]  POINTER               = #.(SB-SYS:INT-SAP #X7FFFE007A350)
+;; [ ]  RECEIVES-DEFAULT      = T
+;; [ ]  RELATED-ACTION        = NIL
+;; [ ]  RELIEF                = :NORMAL
+;; [ ]  RESIZE-MODE           = :PARENT
+;; [ ]  SENSITIVE             = T
+;; [ ]  SIGNAL-HANDLERS       = #()
+;; [ ]  STYLE                 = #<GTK-STYLE {100DE8AF23}>
+;; [ ]  TOOLTIP-MARKUP        = NIL
+;; [ ]  TOOLTIP-TEXT          = NIL
+;; [ ]  USE-ACTION-APPEARANCE = T
+;; [ ]  USE-STOCK             = NIL
+;; [ ]  USE-UNDERLINE         = NIL
+;; [ ]  VALIGN                = :FILL
+;; [ ]  VEXPAND               = NIL
+;; [ ]  VEXPAND-SET           = NIL
+;; [ ]  VISIBLE               = T
+;; [ ]  WIDTH-REQUEST         = -1
+;; [ ]  WINDOW                = #<GDK-WINDOW {100DE8AF43}>
+;; [ ]  XALIGN                = 0.5
+;; [ ]  YALIGN                = 0.5
+
+;; [set value]  [make unbound]
+
+
+;; Ausserdem habe ich den Event Handler von window kopiert und an das
+;; Signal "clicked" gehaengt. Im *inferior-lisp* Buffer von Emacs sehe
+;; ich statt die erwarteten Textausgabe "button has been clicked".
+
+;; Aus gegebenen Anlass moechte ich auf einen Fehler im
+;; *inferior-lisp* Buffer hinweisen, den ich statt der gewuenschten
+;; Textausgabe erhalten hatte, als meine definition des Signal Handler
+;; so aus sah:
+
+;; (g-signal-connect window "clicked"
+;; 		      (lambda (widget)
+;; 			(declare (ignorable widget))
+;; 			(format t "button has been clicked~%")))
+
+
+;; (sbcl:7507): GLib-GObject-WARNING **:
+;; /var/tmp/portage/dev-libs/glib-2.40.0-r1/work/glib-2.40.0/gobject/gsignal.c:2362:
+;; signal 'clicked' is invalid for instance '0x7fffe0005110' of type
+;; 'GtkWindow'
+
+;; In diesem Fall habe ich statt "button" "window" geschrieben und das
+;; Fenster unterstuetzt eben kein signal "clicked".
 
 
 

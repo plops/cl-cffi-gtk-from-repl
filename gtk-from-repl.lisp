@@ -1,12 +1,14 @@
 ;; How to develop a GTK graphical user interface with Common Lisp and
-;; ease Ich beschaeftige mich hauptsaechlich mit Computeralgorithmen
+;; ease
+
+;; Ich beschaeftige mich hauptsaechlich mit Computeralgorithmen
 ;; zur Bildverarbeitung und brauche daher eine einfache Moeglichkeit
 ;; Bilder und Animationen anzuzeigen. Meine bisherigen Versuche mit
 ;; den offenen Bibliotheken LTK (Lisp binding fuer die Tk library),
-;; mcclim oder common-qt einzusetzen sind leider gescheitert.
+;; mcclim oder common-qt sind leider gescheitert.
 
 ;; Vor einiger Zeit entdeckte ich cl-cffi-gtk. Das ist ein Binding um
-;; GTK+ 3 von Common Lisp aus aufzurufen. Nach einigen Experimentieren
+;; GTK+ 3 von Common Lisp aus aufzurufen. Nach einigem Experimentieren
 ;; bin ich jetzt an einem Punkt angelangt wo ich damit effizient
 ;; graphische Oberflaechen erstellen kann. Dabei finde ich wichtig,
 ;; dass ich das GUI Widgets inkrementell zur Laufzeit ersetzen kann,
@@ -451,17 +453,28 @@ signal canvas."
     (gtk-box-pack-start container hb)
     hb))
 
+;; Wenn sich der Canvas mit der Funktion draw-canvas neu zeichnet wird
+;; zum Beispiel die Funktion (spin-button-value 'xpos *paned*)
+;; aufgerufen um den aktuellen Wert des Widgets mit dem Label "XPOS"
+;; zu erhalten. Die Funktion spin-button-value hangelt sich dabei
+;; ausgehend von *paned* zunaechst in die (vertikale) Box auf dessen
+;; rechter Seite, also das zweite Element von:
+;; (gtk-container-get-children *paned*):
 
+;; => (#<GTK-SCROLLED-WINDOW {100A865843}> #<GTK-BOX {100A9F7583}>)
+
+;; Danach suche ich den Symbolnamen im Labeltext der links von jeder
+;; Spinbox steht, greife auf das Adjustment der entsprechenden Spinbox
+;; zu und gebe dessen aktuellen Wert aus.
 
 (defun spin-button-value (name paned)
   "Return the adjustment value of the spin-button that is labeled with NAME."
   (let ((hbox-children (find-if #'(lambda (x)
 				    (string= (symbol-name name) (gtk-label-get-text (first x))))
-				(mapcar #'gtk-container-get-children
-					(gtk-container-get-children
-					 (second (gtk-container-get-children paned)))))))
+				(mapcar #'gtk-container-get-children (gtk-container-get-children
+				  (second (gtk-container-get-children paned)))))))
     (when hbox-children
-     (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
+      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
 #+nil
 (spin-button-value 'ypos *paned*) ;; => 75.0
@@ -470,9 +483,6 @@ signal canvas."
 #+nil
 (run-4)
 
-
-#+nil
-(gtk-container-get-children *paned*) ;; => (#<GTK-SCROLLED-WINDOW {100A865843}> #<GTK-BOX {100A9F7583}>)
 
 #+nil
 (gtk-widget-destroy (second (gtk-container-get-children *paned*)))

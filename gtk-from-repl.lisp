@@ -476,16 +476,28 @@ signal canvas."
     (when hbox-children
       (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
+;; Ein Beispielaufruf ist der Folgende:
+
 #+nil
 (spin-button-value 'ypos *paned*) ;; => 75.0
 
 
+;; Durch Aufruf von run-4 wird das Fenster mit dem Cairo Canvas
+;; geoeffnet, das im Screenshot dargestellt ist.
+
 #+nil
 (run-4)
 
+;; Der folgende Aufruf hangelt sich von *paned* zur vertikalen Box und
+;; l\"oscht alle darin enthaltenen Widgets. Uebrig bleibt nur der
+;; Cairo Canvas.
 
 #+nil
 (gtk-widget-destroy (second (gtk-container-get-children *paned*)))
+
+;; Durch den folgenden Aufruf werden in der laufenden GTK Applikation
+;; wieder Spinboxen erzeugt. Die jedoch mit anderen Defaultwerten
+;; initialisiert sind:
 
 #+nil
 (let* ((vbox (make-instance 'gtk-box :orientation :vertical)))
@@ -496,12 +508,8 @@ signal canvas."
   (gtk-paned-add2 *paned* vbox)
   (gtk-widget-show-all *paned*))
 
+;; Auf diese Weise kann man zum Beispiel auch zusaetzliche Spinboxen
+;; mit anderen Labeltexten als XPOS, YPOS, RADIUS oder ANGLE erzeugen
+;; und damit neue Objekte in draw-canvas zeichnen.
 
-;; Obwohl cl-cffi-gtk einen sehr umfangreichen Teil der GTK+
-;; Bibliothek abdeckt fehlte ein fuer mich sehr wichtiger Teil, um
-;; meine eigenen Daten in eine Cairo Surface zu laden. Dafuer sind
-;; aber nur zwei Funktionen noetig deren Interface ich in diesem Patch
-;; deklariere
-;; https://github.com/plops/cl-cffi-gtk/commit/8eda1c404bcd6c10140103ea6332404cf9b357b0
-;; Um den folgenden Code einfach zu halten, werde ich jedoch von
-;; diesen Funktionen erstmal keinen Gebrauch machen.
+

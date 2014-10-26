@@ -213,6 +213,82 @@
 ;; In diesem Fall habe ich statt "button" "window" geschrieben und das
 ;; Fenster unterstuetzt eben kein signal "clicked".
 
+;; An der Ausgabe des Inspectors fuer die Instanz *button* sehen wir den Slot label:
+;; [ ]  LABEL                 = "test"
+
+;; Ich moechte das Program zu einem Wuerfelprogramm umwandeln, dass
+;; eine zufaellige Zahl zwischen 1 und 6 im Buttonlabel anzeigt.  Um
+;; herauszufinden wie ich diese Modifikation einbauen kann druecke ich
+;; M-. auf der Klassendefinition #<GOBJECT-CLASS GTK-BUTTON> in der
+;; dritten Zeile im Inspector (alternativ geht auch gtk-button im
+;; Aufruf von make-instance). Dadurch springe ich zur Definition der
+;; Klasse im Quellcode von cl-cffi-gtk
+;; ~/quicklisp/dists/quicklisp/software/cl-cffi-gtk-20141006-git/gtk/gtk.button.lisp
+
+;; Die Stelle sieht so aus:
+
+;; (define-g-object-class "GtkButton" gtk-button
+;;   (:superclass gtk-bin
+;;    :export t
+;;    :interfaces ("AtkImplementorIface"
+;;                 "GtkBuildable"
+;;                 "GtkActionable"
+;;                 "GtkActivatable")
+;;    :type-initializer "gtk_button_get_type")
+;;   ....
+;;    (image-position
+;;     gtk-button-image-position
+;;     "image-position" "GtkPositionType" t t)
+;;    (label
+;;     gtk-button-label
+;;     "label" "gchararray" t t)
+;;    (relief
+;;     gtk-button-relief
+;;     "relief" "GtkReliefStyle" t t)
+;;     ....
+
+;; Nach einigem Experimentieren sehe ich dass gtk-button-label die
+;; Method ist, die ich brauche um den Labeltext auszulesen und zu
+;; aendern:
+    
+;; (gtk-button-label *button*) => "test"
+;; (setf (gtk-button-label *button*) "1")  => aendert Button Label zu "1"
+
+(progn
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defparameter *button* nil)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defun run-3 ()
+    (sb-int:with-float-traps-masked (:divide-by-zero)
+      (within-main-loop
+	(let ((window (make-instance 'gtk-window :title "dice"
+				     :default-width 128
+				     :default-height 20
+				     :border-width 12
+				     :type :toplevel)))
+	  (g-signal-connect window "destroy"
+			    (lambda (widget)
+			      (declare (ignorable widget))
+			      (leave-gtk-main)))
+	  (let ((button (make-instance 'gtk-button :label "click for roll")))
+	    (gtk-container-add window button)
+
+	    (setf *button* button)
+	    (g-signal-connect button "clicked"
+			      (lambda (widget)
+				(declare (ignorable widget))
+					    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				(setf (gtk-button-label *button*) (format nil "~a"
+									  (+ 1 (random 5))))
+					    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				)))
+	  (gtk-widget-show-all window))))))
+
+#+nil
+(run-3)
+
+;; Die Funktion run-3 ist damit die erste halbwegs vernuenftige Applikation.
+
 
 
 

@@ -33,7 +33,82 @@
 ;; der rechten Seite des Fensters eingestellt werden koennen.
 
 ;; GTK+ ist eine C library die seine Inhalte auf eine
-;; objektorientierte vorhaelt. Fuer die G
+;; objektorientierte vorhaelt. Insbesonder sind die Widgets als CLOS
+;; Klassen instanzierbar und ihre Parameter koennen entweder bei der
+;; Instanzierung oder spaeter gesetzt werden. Die folgende Funktion
+;; run-0 enthaelt minimalen Code um ein Fenster ohne weitere Widgets
+;; zu erstellen.
+
+(defun run-0 ()
+  (sb-int:with-float-traps-masked (:divide-by-zero)
+    (within-main-loop
+      (let ((window (make-instance 'gtk-window :title "myg-window"
+				   :default-width 580
+				   :default-height 200
+				   :border-width 12
+				   :type :toplevel)))
+	(g-signal-connect window "destroy"
+			  (lambda (widget)
+			    (declare (ignorable widget))
+			    (leave-gtk-main)))
+	(gtk-widget-show-all window)))))
+
+#+nil
+(run-0)
+
+;; Die Instanz window emittiert das Signal "destroy", wenn das Fenster
+;; vom Window manager aus geschlossen wird. Mit der hier lambda
+;; Funktion wird das Programm in diesem Fall abgebrochen.
+
+;; In run-1 wird ein Button zum Fenster window hinzugefuegt.
+
+(defun run-1 ()
+  (sb-int:with-float-traps-masked (:divide-by-zero)
+    (within-main-loop
+      (let ((window (make-instance 'gtk-window :title "myg-window"
+				   :default-width 580
+				   :default-height 200
+				   :border-width 12
+				   :type :toplevel)))
+	(g-signal-connect window "destroy"
+			  (lambda (widget)
+			    (declare (ignorable widget))
+			    (leave-gtk-main)))
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	(let ((button (make-instance 'gtk-button :label "test")))
+	  (gtk-container-add window button))
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	(gtk-widget-show-all window)))))
+
+#+nil
+(run-1)
+
+;; Widgets koennen verschiedene Signale empfangen. Den besten
+;; Ueberblick ueber moegliche Signal bekomme ich fuer gewoehnlich mit
+;; Glade (siehe rechte untere Ecke im Screenshot).
+
+(defun run-1 ()
+  (sb-int:with-float-traps-masked (:divide-by-zero)
+    (within-main-loop
+      (let ((window (make-instance 'gtk-window :title "myg-window"
+				   :default-width 580
+				   :default-height 200
+				   :border-width 12
+				   :type :toplevel)))
+	(g-signal-connect window "destroy"
+			  (lambda (widget)
+			    (declare (ignorable widget))
+			    (leave-gtk-main)))
+	(let ((button (make-instance 'gtk-button :label "test")))
+	  (gtk-container-add window button)
+	  (g-signal-connect window "clicked"
+			    (lambda (widget)
+			      (declare (ignorable widget))
+			      (setf (gtk-button-)))))
+	(gtk-widget-show-all window)))))
+
+
+
 
 (defparameter *paned* nil)
 (defparameter *canvas* nil)

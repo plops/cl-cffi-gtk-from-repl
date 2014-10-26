@@ -410,16 +410,15 @@
 	      (gtk-paned-add2 paned vbox))))
 	(gtk-widget-show-all window)))))
 
-;; Die Spinbox ist meineserachtens das beste Widget um mein
-;; Benutzerinterface zu repraesentiern. Sie bestehen aus einer Zahl
-;; und rechts daneben sind ein Pfeil hoch und runter, um den Wert per
-;; Mausklick anzupassen. Alternativ kann der Wert direkt per
-;; Texteingabe, durch Tastatendruck (Pfeil- oder Bildtasten)
-;; veraendert werden. Der Wertebereich und die den Tastendruecken
-;; entsprechenden diskreten Stufen werden durch die Klasse GTK
-;; Adjustment repraesentiert. Wenn sich der im Adjustment gespeicherte
-;; Wert aendert, sende ich mit gtk-widget-queue-draw einen Nachricht
-;; an den Canvas, dass dieser sich neu zeichnen soll.
+;; I believe that a spin box is the best input widget to represent my
+;; input requirements. A spin box consists a number and next to it are
+;; up and down arrows that allow to adjust the value by mouse
+;; clicks. Alternatively, the value can be directly entered via the
+;; text input field or changed by key presses (arrows or
+;; page-up/down). The value range and that the step size are
+;; represented by the gtk-adjustment class. When the value changes, a
+;; request for a redraw is sent to the canvas using
+;; gtk-widget-queue-draw.
 
 (defun add-spinbox-to-vbox (container name value upper canvas)
   "Make a horizontal box containing a label on the left and a spin
@@ -449,19 +448,20 @@ signal canvas."
     (gtk-box-pack-start container hb)
     hb))
 
-;; Wenn sich der Canvas mit der Funktion draw-canvas neu zeichnet wird
-;; zum Beispiel die Funktion (spin-button-value 'xpos *paned*)
-;; aufgerufen um den aktuellen Wert des Widgets mit dem Label "XPOS"
-;; zu erhalten. Die Funktion spin-button-value hangelt sich dabei
-;; ausgehend von *paned* zunaechst in die (vertikale) Box auf dessen
-;; rechter Seite, also das zweite Element von:
-;; (gtk-container-get-children *paned*):
+;; If the canvas is redrawn by the function draw-canvas, then one of
+;; the calls is (spin-button-value 'xpos *paned*), which reads the
+;; current numerical value from the widget with the label "XPOS". In
+;; order to do this, the spin-button-value function starts from the
+;; object *paned* and traverses into the (vertical) box on the right
+;; side, i.e. the second element of: (gtk-container-get-children
+;; *paned*):
 
 ;; => (#<GTK-SCROLLED-WINDOW {100A865843}> #<GTK-BOX {100A9F7583}>)
 
-;; Danach suche ich den Symbolnamen im Labeltext der links von jeder
-;; Spinbox steht, greife auf das Adjustment der entsprechenden Spinbox
-;; zu und gebe dessen aktuellen Wert aus.
+
+;; Then it searches for the requested symbol name in the label text of
+;; each spin box and returns the numerical value that is stored in the
+;; adjustment.
 
 (defun spin-button-value (name paned)
   "Return the adjustment value of the spin-button that is labeled with NAME."

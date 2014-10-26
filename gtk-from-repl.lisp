@@ -113,10 +113,10 @@
 #+nil
 (run-2)
 
+;; In run 2, I save the object button in a global variable
+;; *button*. The slime Inspector (C-c C-I) shows the following when
+;; applied to this object.
 
-;; In run-2 speichere ich das Objekt button in einer globalen Variable
-;; *button*. Der Slime Inspector (C-c C-I) zeigt fuer dieses Objekt
-;; den folgenden Inhalt an.
 
 ;; #<GTK-BUTTON {100C50D883}>
 ;; --------------------
@@ -184,15 +184,14 @@
 
 ;; [set value]  [make unbound]
 
+;; In addition, I have copied the event handlers of the window and
+;; attached it to the signal 'clicked'. In the *inferior-lisp* buffer
+;; of Emacs each click of the button produces a line with the text
+;; text "button has been clicked".
 
-;; Ausserdem habe ich den Event Handler von window kopiert und an das
-;; Signal "clicked" gehaengt. Im *inferior-lisp* Buffer von Emacs sehe
-;; ich statt die erwarteten Textausgabe "button has been clicked".
-
-;; Aus gegebenen Anlass moechte ich auf einen Fehler im
-;; *inferior-lisp* Buffer hinweisen, den ich statt der gewuenschten
-;; Textausgabe erhalten hatte, als meine definition des Signal Handler
-;; so aus sah:
+;; Given the occasion, I would like to point out an error that was
+;; printed in the *inferior-lisp* buffer instead of the desired text
+;; output when my definition of the signal handler looked like that:
 
 ;; (g-signal-connect window "clicked"
 ;; 		      (lambda (widget)
@@ -205,22 +204,22 @@
 ;; signal 'clicked' is invalid for instance '0x7fffe0005110' of type
 ;; 'GtkWindow'
 
-;; In diesem Fall habe ich statt "button" "window" geschrieben und das
-;; Fenster unterstuetzt eben kein signal "clicked".
+;; In this case, I accidentally wrote "window" instead of "button"
+;; "window" and the window object supports no signal 'clicked'.
 
-;; An der Ausgabe des Inspectors fuer die Instanz *button* sehen wir den Slot label:
-;; [ ]  LABEL                 = "test"
+;; Going back to the output of the inspector of the object button, I
+;; want to emphasize this line:
+;; [ ] LABEL = "test"
 
-;; Ich moechte das Program zu einem Wuerfelprogramm umwandeln, dass
-;; eine zufaellige Zahl zwischen 1 und 6 im Buttonlabel anzeigt.  Um
-;; herauszufinden wie ich diese Modifikation einbauen kann druecke ich
-;; M-. auf der Klassendefinition #<GOBJECT-CLASS GTK-BUTTON> in der
-;; dritten Zeile im Inspector (alternativ geht auch gtk-button im
-;; Aufruf von make-instance). Dadurch springe ich zur Definition der
-;; Klasse im Quellcode von cl-cffi-gtk
-;; ~/quicklisp/dists/quicklisp/software/cl-cffi-gtk-20141006-git/gtk/gtk.button.lisp
-
-;; Die Stelle sieht so aus:
+;; I would like to convert the program to a dice generator, that
+;; displays a random number between 1 and 6 in the button label. To
+;; find out how I can incorporate this modification I press M-. on the
+;; class definition #<GOBJECT CLASS GTK-BUTTON> in the third row of
+;; the Inspector (alternatively one can place the cursor on gtk-button
+;; in the call to make-instance). As a result I jump the definition of
+;; the gtk-button class in cl-cffi-gtk's source code at
+;; ~/quicklisp/dists/quicklisp/software/cl-cffi-GTK-20141006-git/GTK/GTK.button.Lisp
+;; This place looks like this:
 
 ;; (define-g-object-class "GtkButton" gtk-button
 ;;   (:superclass gtk-bin

@@ -9,17 +9,8 @@
 ;; GTK+ 3 von Common Lisp aus aufzurufen. Nach einigen Experimentieren
 ;; bin ich jetzt an einem Punkt angelangt wo ich damit effizient
 ;; graphische Oberflaechen erstellen kann. Dabei finde ich wichtig,
-;; dass ich das GUI Widgets zur Laufzeit ersetzen kann, ohne das Lisp
-;; Image neu starten zu muessen.
-
-;; Obwohl cl-cffi-gtk einen sehr umfangreichen Teil der GTK+
-;; Bibliothek abdeckt fehlte ein fuer mich sehr wichtiger Teil, um
-;; meine eigenen Daten in eine Cairo Surface zu laden. Dafuer sind
-;; aber nur zwei Funktionen noetig deren Interface ich in diesem Patch
-;; deklariere
-;; https://github.com/plops/cl-cffi-gtk/commit/8eda1c404bcd6c10140103ea6332404cf9b357b0
-;; Um den folgenden Code einfach zu halten, werde ich jedoch von
-;; diesen Funktionen erstmal keinen Gebrauch machen.
+;; dass ich das GUI Widgets inkrementell zur Laufzeit ersetzen kann,
+;; ohne das Lisp Image neu starten zu muessen.
 
 ;; Zunaechst einmal muss dass Packet cl-cffi-gtk geladen werden und
 ;; ich definiere ein Packet myg, in dem ich meinen Code schreibe.  Ich
@@ -40,14 +31,20 @@
 ;; linken Seite einen Cairo Canvas zeigen. Darin male ich einen Kreis
 ;; dessen Mittelpunktskoordinaten und Radius durch GUI Elemente auf
 ;; der rechten Seite des Fensters eingestellt werden koennen.
- 
 
-(defparameter *canvas* nil)
+;; GTK+ ist eine C library die seine Inhalte auf eine
+;; objektorientierte vorhaelt. Fuer die G
+
 (defparameter *paned* nil)
+(defparameter *canvas* nil)
 
 (defun spin-button-value (name paned)
   "Return the adjustment value of the spin-button that is labeled with NAME."
-  (let ((hbox-children (find-if #'(lambda (x) (string= (symbol-name name) (gtk-label-get-text (first x)))) (mapcar #'gtk-container-get-children (gtk-container-get-children (second (gtk-container-get-children paned)))))))
+  (let ((hbox-children (find-if #'(lambda (x)
+				    (string= (symbol-name name) (gtk-label-get-text (first x))))
+				(mapcar #'gtk-container-get-children
+					(gtk-container-get-children
+					 (second (gtk-container-get-children paned)))))))
     (when hbox-children
      (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
 
@@ -166,3 +163,12 @@ signal canvas."
   (gtk-paned-add2 *paned* vbox)
   (gtk-widget-show-all *paned*))
 
+
+;; Obwohl cl-cffi-gtk einen sehr umfangreichen Teil der GTK+
+;; Bibliothek abdeckt fehlte ein fuer mich sehr wichtiger Teil, um
+;; meine eigenen Daten in eine Cairo Surface zu laden. Dafuer sind
+;; aber nur zwei Funktionen noetig deren Interface ich in diesem Patch
+;; deklariere
+;; https://github.com/plops/cl-cffi-gtk/commit/8eda1c404bcd6c10140103ea6332404cf9b357b0
+;; Um den folgenden Code einfach zu halten, werde ich jedoch von
+;; diesen Funktionen erstmal keinen Gebrauch machen.

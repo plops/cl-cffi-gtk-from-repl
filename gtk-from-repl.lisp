@@ -241,9 +241,8 @@
 ;;     "relief" "GtkReliefStyle" t t)
 ;;     ....
 
-;; Nach einigem Experimentieren sehe ich dass gtk-button-label die
-;; Method ist, die ich brauche um den Labeltext auszulesen und zu
-;; aendern:
+;; After some experimenting, I realized that gtk-button-label is the
+;; name of the method to read and change the button's text label:
     
 ;; (gtk-button-label *button*) => "test"
 ;; (setf (gtk-button-label *button*) "1")  => aendert Button Label zu "1"
@@ -281,22 +280,18 @@
 #+nil
 (run-3)
 
-;; Die Funktion run-3 ist damit die erste halbwegs vernuenftige GTK Applikation.
+;; The function run-3 is the first reasonable GTK application of this
+;; post.
 
 
-;; Jetzt moechte ich eine interessantere Applikation bauen.  Wie dem
-;; Screenshot zu entnehmen ist, soll das Fenster auf der linken Seite
-;; einen Cairo Canvas zeigen. Darin male ich einen Kreis dessen
-;; Mittelpunktskoordinaten und Radius durch GUI Elemente auf der
-;; rechten Seite des Fensters eingestellt werden koennen.
+;; Now, I want to build a more interesting application. As the
+;; screenshot below shows it consists of a cairo canvas on its left
+;; side. In it, I paint a circle whose of center coordinates and
+;; radius shall be controlled by GUI widgets on the right side of the
+;; window.
 
-;; Ein gtk-paned hat zwei Seiten und einen variablen schieber
-;; dazwischen. Ich nutze dieses Element als hoechstes Element unter
-;; dem Fenster um die Widgets anzuordnen. Damit ich spaeter auf diese
-;; Widgets zugreifen kann. Speichere ich die Paned Instanz in der
-;; globalen Variable *paned*. Weiterhin ist es nuetzlich eine globale
-;; Variable mit dem Cairo Canvas zu haben, so dass neue
-;; Kontrollwidgets sehr einfach einen redraw erzwingen koennen.
+;; A gtk-paned widget splits the window into two sides and a divider between
+;; them that can be adjusted by the user. I store this gtk-paned widget in a global variable *paned*, so that later I can access and all its child widgets. Additionally I also decided to store the cairo canvas in the global variable *canvas* so that I can force it to redraw whenever GUI input widgets change their parameters.
 
 (defparameter *paned* nil)
 (defparameter *canvas* nil)

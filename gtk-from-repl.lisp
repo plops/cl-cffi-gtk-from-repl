@@ -14,8 +14,8 @@
 ;; restart the Lisp image.
 
 ;; First of all the package cl-cffi-gtk must be loaded. Then I define
-;; a I the package myg for all of my code. I structured my source code
-;; so that the file can be easily compiled using the keyboard shortcut
+;; the package myg for my own code. I structured my source code so
+;; that the file can be easily compiled using the keyboard shortcut
 ;; C-c C-k in a SLIME session in Emacs.
 
 
@@ -78,14 +78,14 @@
 #+nil
 (run-1)
 
-;; Widgets koennen verschiedene Signale empfangen. Den besten
-;; Ueberblick ueber moegliche Signal bekomme ich fuer gewoehnlich mit
-;; Glade (siehe rechte untere Ecke im Screenshot).
+;; Widgets can receive different signals. Usually I get a good
+;; overview of possible signals using Glade (see bottom right corner
+;; in the screenshot).
 
 (progn
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (defparameter *button* nil)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (defun run-2 ()
     (sb-int:with-float-traps-masked (:divide-by-zero)
       (within-main-loop
@@ -100,13 +100,13 @@
 			      (leave-gtk-main)))
 	  (let ((button (make-instance 'gtk-button :label "test")))
 	    (gtk-container-add window button)
-	    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	    (setf *button* button)
 	    (g-signal-connect button "clicked"
 			      (lambda (widget)
 				(declare (ignorable widget))
 				(format t "button has been clicked~%")))
-	    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	    )
 	  (gtk-widget-show-all window))))))
 

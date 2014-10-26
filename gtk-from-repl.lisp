@@ -303,18 +303,16 @@
 (defparameter *paned* nil)
 (defparameter *canvas* nil)
 
-(defun spin-button-value (name paned)
-  "Return the adjustment value of the spin-button that is labeled with NAME."
-  (let ((hbox-children (find-if #'(lambda (x)
-				    (string= (symbol-name name) (gtk-label-get-text (first x))))
-				(mapcar #'gtk-container-get-children
-					(gtk-container-get-children
-					 (second (gtk-container-get-children paned)))))))
-    (when hbox-children
-     (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
+;; Der Cairo Canvas ist ein Kapitel fuer sich und wird gut in
+;; folgendem Tutorial zu cl-cffi-gtk erklaert:
+;; http://www.crategus.com/books/cl-gtk/gtk-tutorial_16.html#SEC172
 
-#+nil
-(spin-button-value 'ypos)
+;; Im wesentlichen muss man nur eine draw Funktion definieren, die mit
+;; einzelnen Funktionsaufrufen eine Farbe setzen und eine Kurve
+;; malen. Die Semantik aehnelt sehr der von Postscript.
+
+;; Die folgende einfache Funktion malt einen violetten Kreis und eine
+;; rote Linie auf den Canvas.
 
 (progn
   (defun draw-canvas (widget cr)
@@ -328,9 +326,7 @@
 	     (x (or (spin-button-value 'xpos *paned*) 100d0))
 	     (y (or (spin-button-value 'ypos *paned*) 80d0)))
 	(cairo-arc cr x y radius 0 (* 2 pi))
-					;(cairo-set-source-rgb cr 1 1 1)
-					;(cairo-fill-preserve cr)
-	(cairo-set-source-rgb cr 1 0 1)
+	(cairo-set-source-rgb cr 1 0 1) ;; r g b => violet circle
 	(cairo-stroke cr)
 	(cairo-save cr)
 	(cairo-set-source-rgb cr 1 0 0)
@@ -338,40 +334,40 @@
 	(cairo-line-to cr
 		       (+ x (* radius (sin angle)))
 		       (+ y (* radius (- (cos angle)))))
-	(cairo-stroke cr)
+	(cairo-stroke cr)  ;; draw a red line
 	(cairo-restore cr))
       (cairo-destroy cr)
       t))
   (defparameter *draw-canvas* #'draw-canvas))
 
+;; Zu bemerken ist, dass ich die Funktion in einer globalen Variable
+;; *draw-canvas* speichere. Spaeter im "draw" Signal handler fuer den
+;; Canvas rufe ich mit funcall die darin gespeicherte Funktion
+;; auf. Das hat den Vorteil, dass ich draw-canvas zur Laufzeit neu
+;; definieren kann. Wenn es beim Bauen Fehler gibt, dann wird
+;; (defparameter *draw-canvas* #'draw-canvas) nicht aufgerufen und die
+;; alte Definition bleibt bestehen. Erst wenn die Compilation gelingt
+;; wird *draw-canvas* ersetzt und die neue Funktion malt in den
+;; Canvas.
 
-(defun add-spinbox-to-vbox (container name value upper canvas)
-  "Make a horizontal box containing a label on the left and a spin
-button right of it and add it to container. Changing a value will
-signal canvas."
-  (let* ((hb (make-instance 'gtk-box :orientation :horizontal))
-	 (lab (make-instance 'gtk-label
-			     :label (symbol-name name)))
-	 (adj (make-instance 'gtk-adjustment
-			     :value (* 1d0 value)
-			     :lower 0d0
-			     :upper (* 1d0 upper)
-			     :step-increment 1d0
-			     :page-increment 10d0
-			     :page-size 0d0))
-	 (sb (make-instance 'gtk-spin-button :adjustment adj
-			    :climb-rate 0
-			    :digits 1
-			    :wrap t)))
-    (gtk-spin-button-set-value sb value)
-    (gtk-box-pack-start hb lab)
-    (gtk-box-pack-start hb sb)
-    (g-signal-connect sb "value-changed"
-		      (lambda (adjustment)
-			(declare (ignorable adjustment))
-			(gtk-widget-queue-draw canvas)))
-    (gtk-box-pack-start container hb)
-    hb))
+;; Die Koordinaten radius, angle, x und y sollen von der GUI entnommen
+;; werden. Da die aber bisher noch nicht definiert ist, schreibe ich
+;; erstmal folgende Platzhalterfunktion. 
+
+(defun spin-button-value (name paned)
+  "Return the adjustment value of the spin-button that is labeled with NAME."
+  nil)
+
+;; Da spin-button-value zunaechst immer nil liefert, bewirkt dass das
+;; "or" in draw-canvas auf die dahinterstehnden Zahlenkonstanten als
+;; default Werte ausweicht. Ganz zum Schluss nutze werde mich mit
+;; Hilfe der GTK+ Methoden durch alle GUI Elemente zu den aktuellen
+;; Werten zu hangeln. Dabei wird es sich als sehr hilfreich erweisen,
+;; dass die Objekte interaktiv im REPL und dem Slime Inspector
+;; analysiert werden koennen. Bei Programmierung mit C waere eine
+;; derartige Vorgehensweise undenkbar.
+
+
 
 (defun run ()
   (sb-int:with-float-traps-masked (:divide-by-zero)
@@ -408,6 +404,50 @@ signal canvas."
 	      (add-spinbox-to-vbox vbox 'angle 0 360 canvas)
 	      (gtk-paned-add2 paned vbox))))
 	(gtk-widget-show-all window)))))
+
+(defun add-spinbox-to-vbox (container name value upper canvas)
+  "Make a horizontal box containing a label on the left and a spin
+button right of it and add it to container. Changing a value will
+signal canvas."
+  (let* ((hb (make-instance 'gtk-box :orientation :horizontal))
+	 (lab (make-instance 'gtk-label
+			     :label (symbol-name name)))
+	 (adj (make-instance 'gtk-adjustment
+			     :value (* 1d0 value)
+			     :lower 0d0
+			     :upper (* 1d0 upper)
+			     :step-increment 1d0
+			     :page-increment 10d0
+			     :page-size 0d0))
+	 (sb (make-instance 'gtk-spin-button :adjustment adj
+			    :climb-rate 0
+			    :digits 1
+			    :wrap t)))
+    (gtk-spin-button-set-value sb value)
+    (gtk-box-pack-start hb lab)
+    (gtk-box-pack-start hb sb)
+    (g-signal-connect sb "value-changed"
+		      (lambda (adjustment)
+			(declare (ignorable adjustment))
+			(gtk-widget-queue-draw canvas)))
+    (gtk-box-pack-start container hb)
+    hb))
+
+
+
+(defun spin-button-value (name paned)
+  "Return the adjustment value of the spin-button that is labeled with NAME."
+  (let ((hbox-children (find-if #'(lambda (x)
+				    (string= (symbol-name name) (gtk-label-get-text (first x))))
+				(mapcar #'gtk-container-get-children
+					(gtk-container-get-children
+					 (second (gtk-container-get-children paned)))))))
+    (when hbox-children
+     (gtk-adjustment-get-value (gtk-spin-button-get-adjustment (second hbox-children))))))
+
+#+nil
+(spin-button-value 'ypos *paned*) ;; => 75.0
+
 
 #+nil
 (run)

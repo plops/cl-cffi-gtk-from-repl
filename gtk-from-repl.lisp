@@ -412,7 +412,16 @@
 	      (gtk-paned-add2 paned vbox))))
 	(gtk-widget-show-all window)))))
 
-;; 
+;; Die Spinbox ist meineserachtens das beste Widget um mein
+;; Benutzerinterface zu repraesentiern. Sie bestehen aus einer Zahl
+;; und rechts daneben sind ein Pfeil hoch und runter, um den Wert per
+;; Mausklick anzupassen. Alternativ kann der Wert direkt per
+;; Texteingabe, durch Tastatendruck (Pfeil- oder Bildtasten)
+;; veraendert werden. Der Wertebereich und die den Tastendruecken
+;; entsprechenden diskreten Stufen werden durch die Klasse GTK
+;; Adjustment repraesentiert. Wenn sich der im Adjustment gespeicherte
+;; Wert aendert, sende ich mit gtk-widget-queue-draw einen Nachricht
+;; an den Canvas, dass dieser sich neu zeichnen soll.
 
 (defun add-spinbox-to-vbox (container name value upper canvas)
   "Make a horizontal box containing a label on the left and a spin

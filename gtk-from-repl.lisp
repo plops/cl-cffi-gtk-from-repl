@@ -1,24 +1,22 @@
 ;; How to develop a GTK graphical user interface with Common Lisp and
 ;; ease
 
-;; Ich beschaeftige mich hauptsaechlich mit Computeralgorithmen
-;; zur Bildverarbeitung und brauche daher eine einfache Moeglichkeit
-;; Bilder und Animationen anzuzeigen. Meine bisherigen Versuche mit
-;; den offenen Bibliotheken LTK (Lisp binding fuer die Tk library),
-;; mcclim oder common-qt sind leider gescheitert.
+;; I deal mainly with computer algorithms in image processing and need
+;; therefore need a simple way to display mages and animations. My
+;; previous attempts with the open libraries LTK (Lisp binding for the
+;; TK library), mcclim or common qt have unfortunately failed.
 
-;; Vor einiger Zeit entdeckte ich cl-cffi-gtk. Das ist ein Binding um
-;; GTK+ 3 von Common Lisp aus aufzurufen. Nach einigem Experimentieren
-;; bin ich jetzt an einem Punkt angelangt wo ich damit effizient
-;; graphische Oberflaechen erstellen kann. Dabei finde ich wichtig,
-;; dass ich das GUI Widgets inkrementell zur Laufzeit ersetzen kann,
-;; ohne das Lisp Image neu starten zu muessen.
+;; Some time ago I discovered cl-cffi-gtk. This is a foreign function
+;; binding to call GTK+ 3 from Common Lisp. After some experimenting I
+;; arrived at a point where I can create graphical interfaces rather
+;; efficiently. For this, I think it is important that I can
+;; incrementally replace the GUI widgets at runtime, without having to
+;; restart the Lisp image.
 
-;; Zunaechst einmal muss dass Packet cl-cffi-gtk geladen werden und
-;; ich definiere ein Packet myg, in dem ich meinen Code schreibe.  Ich
-;; strukturiere meinen Quellcode so, dass die Datei in einer Emacs
-;; session mit laufendem Slime mit der Tastenkombination C-c C-k
-;; compiliert werden kann.
+;; First of all the package cl-cffi-gtk must be loaded. Then I define
+;; a I the package myg for all of my code. I structured my source code
+;; so that the file can be easily compiled using the keyboard shortcut
+;; C-c C-k in a SLIME session in Emacs.
 
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -30,8 +28,8 @@
 (in-package :myg)
 
 
-;; GTK+ ist eine C library die seine Inhalte auf eine
-;; objektorientierte vorhaelt. Insbesonder sind die Widgets als CLOS
+;; GTK+ ist eine C Library die seine Inhalte auf eine
+;; objektorientierte Art vorhaelt. Insbesonder sind die Widgets als CLOS
 ;; Klassen instanzierbar und ihre Parameter koennen entweder bei der
 ;; Instanzierung oder spaeter gesetzt werden. Die folgende Funktion
 ;; run-0 enthaelt minimalen Code um ein Fenster ohne weitere Widgets

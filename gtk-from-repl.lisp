@@ -362,22 +362,17 @@
   "Return the adjustment value of the spin-button that is labeled with NAME."
   nil)
 
-;; Da spin-button-value zunaechst immer nil liefert, bewirkt dass das
-;; "or" in draw-canvas auf die dahinterstehnden Zahlenkonstanten als
-;; default Werte ausweicht. Ganz zum Schluss nutze werde mich mit
-;; Hilfe der GTK+ Methoden durch alle GUI Elemente zu den aktuellen
-;; Werten zu hangeln. Dabei wird es sich als sehr hilfreich erweisen,
-;; dass die Objekte interaktiv im REPL und dem Slime Inspector
-;; analysiert werden koennen. Bei Programmierung mit C waere eine
-;; derartige Vorgehensweise undenkbar.
+;; When spin-button-value returns nil, the calls to "or" in
+;; draw-canvas will evaluate to the second parameter with a numerical
+;; constant.
 
-;; Die Funktion run-4 baut nun wie vorher das GUI Fenster auf. Als
-;; erstes wird ein Hauptfenster (top-level window) erstellt. Darin ein
-;; Paned Objekt, dass das Fenster vertikal in zwei Teile teilt. Links
-;; kommt der Cairo Canvas hin. Dessen Groesse wird auf 1024x1024
-;; gesetzt und ich packe ein scrolled-window drumherum um scrollbars
-;; zu haben. Auf die rechte Seite des Paned kommt eine Box mit
-;; vertikal angeordneten Spinboxen. 
+;; The following function run-4 constructs a the GUI window as before.
+;; First it creates a top-level window. Then attached as gtk-paned
+;; object create a vertical division.  The left section is filled with
+;; a cairo canvas whose dimensions are set to 1024x1024. If the
+;; top-level window is too small, the scrolled-window objects adds
+;; scrollbars. The right side of gtk-paned is filed with a vertical
+;; box of gtk-spinboxes.
 
 (defun run-4 ()
   (sb-int:with-float-traps-masked (:divide-by-zero)

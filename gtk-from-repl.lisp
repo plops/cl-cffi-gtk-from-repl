@@ -290,22 +290,27 @@
 ;; radius shall be controlled by GUI widgets on the right side of the
 ;; window.
 
-;; A gtk-paned widget splits the window into two sides and a divider between
-;; them that can be adjusted by the user. I store this gtk-paned widget in a global variable *paned*, so that later I can access and all its child widgets. Additionally I also decided to store the cairo canvas in the global variable *canvas* so that I can force it to redraw whenever GUI input widgets change their parameters.
+;; A gtk-paned widget splits the window using a divider that can be
+;;  adjusted by the user. I store this gtk-paned widget in a global
+;;  variable *paned*, so that later I can access it and all its child
+;;  widgets. Additionally I also decided to store the cairo canvas in
+;;  the global variable *canvas* so that I can force it to redraw
+;;  whenever GUI input widgets change their parameters.
 
 (defparameter *paned* nil)
 (defparameter *canvas* nil)
 
-;; Der Cairo Canvas ist ein Kapitel fuer sich und wird gut in
-;; folgendem Tutorial zu cl-cffi-gtk erklaert:
-;; http://www.crategus.com/books/cl-gtk/gtk-tutorial_16.html#SEC172
+;; Using the Cairo canvas is a chapter in itself and is introduced
+;; very well in the cl-cffi-gtk tutorial on:
+;; http://www.crategus.com/books/CL-GTK/GTK-tutorial_16.html#SEC172
 
-;; Im wesentlichen muss man nur eine draw Funktion definieren, die mit
-;; einzelnen Funktionsaufrufen eine Farbe setzen und eine Kurve
-;; malen. Die Semantik aehnelt sehr der von Postscript.
+;; Essentially, you define a draw function that calls cairo functions
+;; to set up a state machine and draw lines and curves with specific
+;; colors and coordinate transforms. The semantics are very similar to
+;; those of PostScript.
 
-;; Die folgende einfache Funktion malt einen violetten Kreis und eine
-;; rote Linie auf den Canvas.
+;; The following simple function paints a purple circle and one
+;; red line on the canvas:
 
 (progn
   (defun draw-canvas (widget cr)
@@ -333,19 +338,24 @@
       t))
   (defparameter *draw-canvas* #'draw-canvas))
 
-;; Zu bemerken ist, dass ich die Funktion in einer globalen Variable
-;; *draw-canvas* speichere. Spaeter im "draw" Signal handler fuer den
-;; Canvas rufe ich mit funcall die darin gespeicherte Funktion
-;; auf. Das hat den Vorteil, dass ich draw-canvas zur Laufzeit neu
-;; definieren kann. Wenn es beim Bauen Fehler gibt, dann wird
-;; (defparameter *draw-canvas* #'draw-canvas) nicht aufgerufen und die
-;; alte Definition bleibt bestehen. Erst wenn die Compilation gelingt
-;; wird *draw-canvas* ersetzt und die neue Funktion malt in den
-;; Canvas.
+;; First, I would like to say something about the peculiar function
+;; definition. I store the function draw-canvas in the global variable
+;; *draw-canvas*. Later in the 'draw' signal handlers for the canvas I
+;; will call the function from this global variable using
+;; funcall. This allows me to redefine the function during run-time
+;; and if there are errors while compiling draw-canvas, the call to
+;; (defparameter *draw-canvas* #' draw-canvas) will not be executed,
+;; keeping the old working function intact. Only with successful
+;; compilation the value in *draw-canvas* is replaced and the new draw
+;; function will be used. (There may still be other errors that the
+;; compilation doesn't step but in my experience this method catches
+;; quite a few unnecessary bugs which would otherwise force to restart
+;; the lisp image).
 
-;; Die Koordinaten radius, angle, x und y sollen von der GUI entnommen
-;; werden. Da die aber bisher noch nicht definiert ist, schreibe ich
-;; erstmal folgende Platzhalterfunktion. 
+;; Eventually, the variables radius, angle the coordinates x and y
+;; shall be obtained from the GUI input widgets. But as I haven't
+;; described them let's just assume the following stub definition
+;; returning always nil:
 
 #+nil
 (defun spin-button-value (name paned)

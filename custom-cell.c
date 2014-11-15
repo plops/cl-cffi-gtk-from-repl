@@ -11,9 +11,11 @@ int main(int argc, char**argv)
   gtk_container_set_border_width(GTK_CONTAINER(window),10);
 
   g_signal_connect(G_OBJECT(window),"destroy",
-		   G_CALLBACK({void _() { gtk_main_quit();  } (void (*)())_;}),NULL);
+		   G_CALLBACK({void _(GtkWidget*window,gpointer data) {
+			 gtk_main_quit();  } (void (*)(GtkWidget*window,gpointer data))_;}),NULL);
   g_signal_connect(G_OBJECT(window),"delete-event",
-		   G_CALLBACK({gboolean _() { return FALSE;  } (void (*)())_;}),NULL);
+		   G_CALLBACK({gboolean _(GtkWidget*window,GdkEvent*event,gpointer data) {
+			 return FALSE;  } (gboolean (*)(GtkWidget*window,GdkEvent*event,gpointer data))_;}),NULL);
 
   label = gtk_label_new("Hello World");
   gtk_label_set_selectable(GTK_LABEL(label),TRUE);

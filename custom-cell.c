@@ -8,6 +8,13 @@ int main(int argc, char**argv)
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(window),"hello world");
   gtk_widget_show(window);
+
+  ({void _() {
+    printf("World!\n");
+  } (void (*)())_;})();
+
+
   gtk_main();
+  
   return 0;
 }

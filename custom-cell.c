@@ -84,8 +84,8 @@ GType my_ip_address_get_type(void)
   return entry_type;
 }
 
-static void my_ip_address_set_property(GObject *object, guint prop_id, const GValue *value,
-				       GParamSpec*pspec)
+static void
+my_ip_address_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec*pspec)
 {
   MyIPAddress *ipaddress = MY_IP_ADDRESS(object);
   gint address[4] = {-1,-1,-1,-1};
@@ -111,7 +111,21 @@ static void my_ip_address_set_property(GObject *object, guint prop_id, const GVa
     break;
   }
 }
- 
+
+static void
+my_ip_address_get_property(GObject*object,guint prop_id,GValue *value,GParamSpec *pspec)
+{
+  MyIPAddress *ipaddress = MY_IP_ADDRESS(object);
+  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  switch(prop_id){
+  case PROP_IP1: g_value_set_int(value,priv->address[0]); break;
+  case PROP_IP2: g_value_set_int(value,priv->address[1]); break;
+  case PROP_IP3: g_value_set_int(value,priv->address[2]); break;
+  case PROP_IP4: g_value_set_int(value,priv->address[3]); break;
+  default:  C_OBJECT_WARN_INVALID_PROPERTY_ID(object,prop_id,pspec); break;
+  }
+}
+
 
 static void
 my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)

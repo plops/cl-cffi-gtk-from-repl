@@ -5,6 +5,11 @@
 #include <glib-object.h>
 #include <gtk/gtkentry.h>
 
+#include <gdk/gdkkeysyms.h>
+#include <stdlib.h>
+#include <math.h>
+
+
 // each new object needs 5 macros
 #define MY_IP_ADDRESS_TYPE (my_ip_address_get_type())
 #define MY_IP_ADDRESS(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), MY_IP_ADDRESS_TYPE, MyIPAddress))
@@ -30,9 +35,6 @@ GtkWidget* my_ip_address_new(void);
 gchar* my_ip_address_get_address(MyIPAddress *ipaddress);
 void my_ip_address_set_address(MyIPAddress*ipaddress,gint address[4]);
 
-#include <gdk/gdkkeysyms.h>
-#include <stdlib.h>
-#include <math.h>
 
 #define MY_IP_ADDRESS_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj),MY_IP_ADDRESS_TYPE,MyIPAddressPrivate))
 
@@ -55,6 +57,51 @@ enum {
   PROP_IP4};
 
 static guint my_ip_address_signals[LAST_SIGNAL]={0};
+
+static void my_ip_address_move_cursor(GObject*entry,GParamSpec*spec)
+{
+  gint cursor = gtk_editable_get_position(GTK_EDITABLE(entry));
+  if(cursor<=3)
+    gtk_editable_set_position(GTK_EDITABLE(entry),3);
+  else if(cursor<=7)
+    gtk_editable_set_position(GTK_EDITABLE(entry),7);
+  else if(cursor<=11)
+    gtk_editable_set_position(GTK_EDITABLE(entry),11);
+  else
+    gtk_editable_set_position(GTK_EDITABLE(entry),15);
+}
+
+static gboolean my_ip_address_key_pressed(GtkEntry *entry,GdkEventKey*event)
+{
+  MyIPAddressPrivate*priv=MY_IP_ADDRESS_GET_PRIVATE(entry);
+  guint k = event->keyval;
+  gint cursor,value;
+  // if key is digit and result <255 append to number
+  if((k>=GDK_KEY_0 && k<=GDK_KEY_9) || (k>=GDK_KEY_KP_0 && k<= GDK_KEY_KP_9)){
+    cursor = floor(gtk_editable_get_position(GTK_EDITABLE(entry))/4);
+    value = g_ascii_digit_value(event->string[0]);
+    if((priv->address[cursor]==25) && (value>5))
+      return TRUE;
+    if(priv->address[cursor]<26){
+      priv->address[cursor]*=10;
+      priv->address[cursor]+=value;
+      my_ip_address_render(MY_IP_ADDRESS(entry));
+      gtk_editable_set_position(GTK_EDITABLE(entry),(4*cursor)+3);
+      g_signal_emit_by_name((gpointer)entry,"ip-changed");
+    }
+  } else if (k==GDK_KEY_Tab){ // move to next block or wrap around to first
+    cursor = floor(gtk_editable_get_position(GTK_EDITABLE(entry))/4)+1;
+    gtk_editable_set_position(GTK_EDITABLE(entry),(4*(cursor%4))+3);
+  } else if (k==GDK_KEY_BackSpace){ // delete last digit, divide by 10 ignore remainder
+    cursor=floor(gtk_editable_get_position(GTK_EDITABLE(entry))/4);
+    priv->address[cursor] /= 10;
+    my_ip_address_render(MY_IP_ADDRESS(entry));
+    gtk_editable_set_position(GTK_EDITABLE(entry),(4*cursor)+3);
+    g_signal_emit_by_name((gpointer) entry,"ip-changed");
+  } else if ((k==GDK_KEY_Return) || (k==GDK_KEY_KP_Enter)) // send activate signal
+    gtk_widget_activate(GTK_WIDGET(entry));
+  return TRUE;
+}
 
 // only function that writes to gtk-entry widget
 static void my_ip_address_render(MyIPAddress*ipaddress)
@@ -207,6 +254,35 @@ my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
 		      0, 255, 0,
 		      G_PARAM_READWRITE));
 				  
+}
+
+GtkWidget*my_ip_address_new()
+{
+  return GTK_WIDGET(g_object_new(my_ip_address_get_type(),NULL));
+}
+
+// the returned string must be freed after use
+gchar* my_ip_address_get_address(MyIPAddress*ipaddress)
+{
+  MyIPAddressPrivate*priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  return g_strdup_printf("%d.%d.%d.%d",priv->address[0],priv->address[1],priv->address[2],priv->address[3]);
+}
+
+void my_ip_address_set_address(MyIPAddress *ipaddress, gint address[4])
+{
+  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  guint some_changed = 0;
+  for(guint i=0;i<4;i++)
+    if(address[i]>=0 && address[i] <= 255){
+      if(priv->address[i] != address[i]){
+	some_changed=1;
+	priv->address[i] = address[i];
+      }
+    }
+  if(some_changed){
+    my_ip_address_render(ipaddress);
+    g_signal_emit_by_name((gpointer)ipaddress,"ip-changed");
+  }
 }
 
 int main(int argc, char**argv)

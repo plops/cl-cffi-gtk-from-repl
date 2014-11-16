@@ -84,32 +84,65 @@ GType my_ip_address_get_type(void)
   return entry_type;
 }
 
+static void my_ip_address_set_property(GObject *object, guint prop_id, const GValue *value,
+				       GParamSpec*pspec)
+{
+  MyIPAddress *ipaddress = MY_IP_ADDRESS(object);
+  gint address[4] = {-1,-1,-1,-1};
+  switch(prop_id){
+  case PROP_IP1:
+    address[0] = g_value_get_int(value);
+    my_ip_address_set_address(ipaddress,address);
+    break;
+  case PROP_IP2:
+    address[1] = g_value_get_int(value);
+    my_ip_address_set_address(ipaddress,address);
+    break;
+  case PROP_IP3:
+    address[2] = g_value_get_int(value);
+    my_ip_address_set_address(ipaddress,address);
+    break;
+  case PROP_IP4:
+    address[3] = g_value_get_int(value);
+    my_ip_address_set_address(ipaddress,address);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID(object,prop_id,pspec);
+    break;
+  }
+}
+ 
+
 static void
 my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-  void set_property()
-  {
-    
-  };
   // always override get and set if you have any new properties
-  gobject_class->set_property = set_property;
-  gobject_class->get_property = get_property;
+  gobject_class->set_property = my_ip_address_set_property;
+  gobject_class->get_property = my_ip_address_get_property;
 
   g_type_class_add_private(klass,sizeof(MyIPAddressPrivate));
 
   my_ip_address_signals[CHANGED_SIGNAL] =
-    g_signal_new("ip-changed", G_TYPE_FROM_CLASS(klass),
-		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		 G_STRUCT_OFFSET(MyIpAddressClass,ip_changed),
-		 NULL,NULL,g_cclosure_marshall_VOID__VOID,G_TYPE_NONE,0);
+    g_signal_new("ip-changed" /* signal-name */,
+		 G_TYPE_FROM_CLASS(klass) /* class-type */ ,
+		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION /* signal-flags */,
+		 // run-first .. during first emission stage
+		 // signal-action .. can be emitted with g_signal_emit
+		 // without pre-emission adjustments to object
+		 G_STRUCT_OFFSET(MyIpAddressClass,ip_changed) /* class-offset */,
+		 NULL /* accumulator */,
+		 NULL /* accumulator-data */ ,
+		 g_cclosure_marshall_VOID__VOID /* c_marshaller */,
+		 G_TYPE_NONE /* return-type */,
+		 0 /* n_parameters */); // parameters excluding instance and user-data
 
   g_object_class_install_property
     (gobject_class, PROP_IP1,
-     g_param_spec_int("ip-number-1", "IP Address Number 1",
-		      "The first IP address number",
-		      0, 255, 0,
-		      G_PARAM_READWRITE));
+     g_param_spec_int("ip-number-1" /* name */, "IP Address Number 1" /* nick */,
+		      "The first IP address number" /* blurb */,
+		      0 /* min */ , 255 /* max */, 0 /* defaul */,
+		      G_PARAM_READWRITE /* flags */ ));
   g_object_class_install_property
     (gobject_class, PROP_IP2,
      g_param_spec_int("ip-number-2", "IP Address Number 2",

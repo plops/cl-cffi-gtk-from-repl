@@ -308,10 +308,25 @@ int main(int argc, char**argv)
 		   G_CALLBACK({gboolean _(GtkWidget*window,GdkEvent*event,gpointer data) {
 			 return FALSE;  } (gboolean (*)(GtkWidget*window,GdkEvent*event,gpointer data))_;}),NULL);
 
-  label = gtk_label_new("Hello World");
-  gtk_label_set_selectable(GTK_LABEL(label),TRUE);
+  GtkWidget *ipaddress = my_ip_address_new();
+  gint address[4]={1,20,35,244};
+  my_ip_address_set_address(MY_IP_ADDRESS(ipaddress),address);
+  g_signal_connect(G_OBJECT(ipaddress),"ip-changed",
+		   G_CALLBACK({
+		       void _(MyIPAddress*ipaddress,gpointer data)
+		       {
+			 gchar*address = my_ip_address_get_address(ipaddress);
+			 g_print("%s\n",address);
+			 g_free(address);
+		       }
+		       (void (*)(MyIPAddress*,gpointer))_;
+		     }),NULL);
+  
+  
+  //label = gtk_label_new("Hello World");
+  //gtk_label_set_selectable(GTK_LABEL(label),TRUE);
 
-  gtk_container_add(GTK_CONTAINER(window),label);
+  gtk_container_add(GTK_CONTAINER(window),ipaddress);
   
   gtk_widget_show_all(window);
   

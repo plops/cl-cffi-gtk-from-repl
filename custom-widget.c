@@ -48,14 +48,16 @@ struct _MyIPAddressPrivate {
 
 enum {
   CHANGED_SIGNAL, // will be emitted when user or program changes content of IP address
-  LAST_SIGNAL };
+  LAST_SIGNAL
+};
 
 enum {
   PROP_0,
   PROP_IP1,
   PROP_IP2,
   PROP_IP3,
-  PROP_IP4};
+  PROP_IP4
+};
 
 static guint my_ip_address_signals[LAST_SIGNAL]={0};
 

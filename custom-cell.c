@@ -67,20 +67,69 @@ GType my_ip_address_get_type(void)
       NULL, // base_init reallocate all dynamic class members copied from base class
       NULL, // base_finalize finalize things done by base_init
       (GClassInitFunc)my_ip_address_class_init,
-      // class_init fill virtual functions and register signals
+      // class_init (required) fill virtual functions and register signals
       NULL, // class_finalize, barely needed because base... deals with dynamically allocated resources
       NULL, // class_data a pointer passed to class_init and class_finalize
       sizeof(MyIPAddress), // instance_size 
       0, // n_preallocs (ignored since glib 2.1)
       (GInstanceInitFunc) my_ip_address_init
-      // instance_init, here it connects signals and packs widget
+      // instance_init, (optional) here it connects signals and packs widget
       // value_table only used when creating fundamental types
     };
-    entry_type = g_type_register_static(GTK_TYPE_ENTRY, "MyIPAddress", &entry_info, 0);
+    entry_type = g_type_register_static(GTK_TYPE_ENTRY /* parent */, 
+					"MyIPAddress"  /* type_name */,
+					&entry_info,
+					0 /* flags  abstract or value-abstract */);
   }
   return entry_type;
 }
 
+static void
+my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
+{
+  GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+  void set_property()
+  {
+    
+  };
+  // always override get and set if you have any new properties
+  gobject_class->set_property = set_property;
+  gobject_class->get_property = get_property;
+
+  g_type_class_add_private(klass,sizeof(MyIPAddressPrivate));
+
+  my_ip_address_signals[CHANGED_SIGNAL] =
+    g_signal_new("ip-changed", G_TYPE_FROM_CLASS(klass),
+		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		 G_STRUCT_OFFSET(MyIpAddressClass,ip_changed),
+		 NULL,NULL,g_cclosure_marshall_VOID__VOID,G_TYPE_NONE,0);
+
+  g_object_class_install_property
+    (gobject_class, PROP_IP1,
+     g_param_spec_int("ip-number-1", "IP Address Number 1",
+		      "The first IP address number",
+		      0, 255, 0,
+		      G_PARAM_READWRITE));
+  g_object_class_install_property
+    (gobject_class, PROP_IP2,
+     g_param_spec_int("ip-number-2", "IP Address Number 2",
+		      "The second IP address number",
+		      0, 255, 0,
+		      G_PARAM_READWRITE));
+  g_object_class_install_property
+    (gobject_class, PROP_IP3,
+     g_param_spec_int("ip-number-3", "IP Address Number 3",
+		      "The third IP address number",
+		      0, 255, 0,
+		      G_PARAM_READWRITE));
+  g_object_class_install_property
+    (gobject_class, PROP_IP4,
+     g_param_spec_int("ip-number-4", "IP Address Number 4",
+		      "The fourth IP address number",
+		      0, 255, 0,
+		      G_PARAM_READWRITE));
+				  
+}
 
 int main(int argc, char**argv)
 {

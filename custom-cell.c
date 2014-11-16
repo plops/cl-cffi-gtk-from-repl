@@ -56,6 +56,30 @@ enum {
 
 static guint my_ip_address_signals[LAST_SIGNAL]={0};
 
+// return a numercial value that is unique to the registered type
+GType my_ip_address_get_type(void) 
+{
+  static GType entry_type = 0;
+
+  if(!entry_type){
+    static const GTypeInfo entry_info = {
+      sizeof(MyIPAddressClass), // size of the structure
+      NULL, // base_init reallocate all dynamic class members copied from base class
+      NULL, // base_finalize finalize things done by base_init
+      (GClassInitFunc)my_ip_address_class_init,
+      // class_init fill virtual functions and register signals
+      NULL, // class_finalize, barely needed because base... deals with dynamically allocated resources
+      NULL, // class_data a pointer passed to class_init and class_finalize
+      sizeof(MyIPAddress), // instance_size 
+      0, // n_preallocs (ignored since glib 2.1)
+      (GInstanceInitFunc) my_ip_address_init
+      // instance_init, here it connects signals and packs widget
+      // value_table only used when creating fundamental types
+    };
+    entry_type = g_type_register_static(GTK_TYPE_ENTRY, "MyIPAddress", &entry_info, 0);
+  }
+  return entry_type;
+}
 
 
 int main(int argc, char**argv)

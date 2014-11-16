@@ -5,6 +5,7 @@
 #include <glib-object.h>
 #include <gtk/gtkentry.h>
 
+
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,13 +19,13 @@
 #define IS_MY_IP_ADDRESS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), MY_IP_ADDRESS_TYPE))
 
 typedef struct _MyIPAddress MyIPAddress;
-typedef struct _MyIPAdressClass MyIPAdressClass;
+typedef struct _MyIPAddressClass MyIPAddressClass;
 
-struct _MyIPAdress {
+struct _MyIPAddress {
   GtkEntry entry;
 };
 
-struct _MyIPAdressClass {
+struct _MyIPAddressClass {
   GtkEntryClass parent_class;
   void (*ip_changed)(MyIPAddress *ipaddress);
 };
@@ -71,6 +72,23 @@ static void my_ip_address_move_cursor(GObject*entry,GParamSpec*spec)
     gtk_editable_set_position(GTK_EDITABLE(entry),15);
 }
 
+
+// only function that writes to gtk-entry widget
+static void my_ip_address_render(MyIPAddress*ipaddress)
+{
+  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  GString*text = g_string_new(NULL);
+  for(guint i=0;i<4;i++){
+    gchar*temp=g_strdup_printf("%3i.",priv->address[i]);
+    text = g_string_append(text,temp);
+    g_free(temp);
+  }
+  text = g_string_truncate(text,15);
+  gtk_entry_set_text(GTK_ENTRY(ipaddress),text->str);
+  g_string_free(text,TRUE);
+}
+
+
 static gboolean my_ip_address_key_pressed(GtkEntry *entry,GdkEventKey*event)
 {
   MyIPAddressPrivate*priv=MY_IP_ADDRESS_GET_PRIVATE(entry);
@@ -103,30 +121,14 @@ static gboolean my_ip_address_key_pressed(GtkEntry *entry,GdkEventKey*event)
   return TRUE;
 }
 
-// only function that writes to gtk-entry widget
-static void my_ip_address_render(MyIPAddress*ipaddress)
-{
-  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
-  GString*text = g_string_new(NULL);
-  for(guint i=0;i<4;i++){
-    gchar*temp=g_strdup_printf("%3i.",priv->address[i]);
-    text = g_string_append(text,temp);
-    g_free(temp);
-  }
-  text = g_string_truncate(text,15);
-  gtk_entry_set_text(GTK_ENTRY(ipaddress),text->str);
-  g_string_free(text,TRUE);
-}
-
 static void my_ip_address_init(MyIPAddress*ipaddress)
 {
   MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
   for(guint i=0;i<4;i++)
     priv->address[i]=0;
-  PangoFontDescription *fd = pango_font_description_from_string("Monospace");
-  gtk_widget_modify_font(GTK_WIDGET(ipaddress),fd);
+
   my_ip_address_render(ipaddress);
-  pango_font_description_free(fd);
+
 
   g_signal_connect(G_OBJECT(ipaddress),"key-press-event",
 		   G_CALLBACK(my_ip_address_key_pressed),NULL);
@@ -134,33 +136,6 @@ static void my_ip_address_init(MyIPAddress*ipaddress)
 		   G_CALLBACK(my_ip_address_move_cursor),NULL);
 }
 
-// return a numercial value that is unique to the registered type
-GType my_ip_address_get_type(void) 
-{
-  static GType entry_type = 0;
-
-  if(!entry_type){
-    static const GTypeInfo entry_info = {
-      sizeof(MyIPAddressClass), // size of the structure
-      NULL, // base_init reallocate all dynamic class members copied from base class
-      NULL, // base_finalize finalize things done by base_init
-      (GClassInitFunc)my_ip_address_class_init,
-      // class_init (required) fill virtual functions and register signals
-      NULL, // class_finalize, barely needed because base... deals with dynamically allocated resources
-      NULL, // class_data a pointer passed to class_init and class_finalize
-      sizeof(MyIPAddress), // instance_size 
-      0, // n_preallocs (ignored since glib 2.1)
-      (GInstanceInitFunc) my_ip_address_init
-      // instance_init, (optional) here it connects signals and packs widget
-      // value_table only used when creating fundamental types
-    };
-    entry_type = g_type_register_static(GTK_TYPE_ENTRY /* parent */, 
-					"MyIPAddress"  /* type_name */,
-					&entry_info,
-					0 /* flags  abstract or value-abstract */);
-  }
-  return entry_type;
-}
 
 static void
 my_ip_address_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec*pspec)
@@ -200,7 +175,7 @@ my_ip_address_get_property(GObject*object,guint prop_id,GValue *value,GParamSpec
   case PROP_IP2: g_value_set_int(value,priv->address[1]); break;
   case PROP_IP3: g_value_set_int(value,priv->address[2]); break;
   case PROP_IP4: g_value_set_int(value,priv->address[3]); break;
-  default:  C_OBJECT_WARN_INVALID_PROPERTY_ID(object,prop_id,pspec); break;
+  default:  G_OBJECT_WARN_INVALID_PROPERTY_ID(object,prop_id,pspec); break;
   }
 }
 
@@ -222,10 +197,10 @@ my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
 		 // run-first .. during first emission stage
 		 // signal-action .. can be emitted with g_signal_emit
 		 // without pre-emission adjustments to object
-		 G_STRUCT_OFFSET(MyIpAddressClass,ip_changed) /* class-offset */,
+		 G_STRUCT_OFFSET(MyIPAddressClass,ip_changed) /* class-offset */,
 		 NULL /* accumulator */,
 		 NULL /* accumulator-data */ ,
-		 g_cclosure_marshall_VOID__VOID /* c_marshaller */,
+		 g_cclosure_marshal_VOID__VOID /* c_marshaller */,
 		 G_TYPE_NONE /* return-type */,
 		 0 /* n_parameters */); // parameters excluding instance and user-data
 
@@ -252,9 +227,41 @@ my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
      g_param_spec_int("ip-number-4", "IP Address Number 4",
 		      "The fourth IP address number",
 		      0, 255, 0,
-		      G_PARAM_READWRITE));
-				  
+		      G_PARAM_READWRITE));				  
 }
+
+
+
+// return a numercial value that is unique to the registered type
+GType my_ip_address_get_type(void) 
+{
+  static GType entry_type = 0;
+
+  if(!entry_type){
+    static const GTypeInfo entry_info = {
+      sizeof(MyIPAddressClass), // size of the structure
+      NULL, // base_init reallocate all dynamic class members copied from base class
+      NULL, // base_finalize finalize things done by base_init
+      (GClassInitFunc)my_ip_address_class_init,
+      // class_init (required) fill virtual functions and register signals
+      NULL, // class_finalize, barely needed because base... deals with dynamically allocated resources
+      NULL, // class_data a pointer passed to class_init and class_finalize
+      sizeof(MyIPAddress), // instance_size 
+      0, // n_preallocs (ignored since glib 2.1)
+      (GInstanceInitFunc) my_ip_address_init
+      // instance_init, (optional) here it connects signals and packs widget
+      ,0
+      // value_table only used when creating fundamental types
+    };
+    entry_type = g_type_register_static(GTK_TYPE_ENTRY /* parent */, 
+					"MyIPAddress"  /* type_name */,
+					&entry_info,
+					0 /* flags  abstract or value-abstract */);
+  }
+  return entry_type;
+}
+
+
 
 GtkWidget*my_ip_address_new()
 {

@@ -56,6 +56,21 @@ enum {
 
 static guint my_ip_address_signals[LAST_SIGNAL]={0};
 
+// only function that writes to gtk-entry widget
+static void my_ip_address_render(MyIPAddress*ipaddress)
+{
+  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  GString*text = g_string_new(NULL);
+  for(guint i=0;i<4;i++){
+    gchar*temp=g_strdup_printf("%3i.",priv->address[i]);
+    text = g_string_append(text,temp);
+    g_free(temp);
+  }
+  text = g_string_truncate(text,15);
+  gtk_entry_set_text(GTK_ENTRY(ipaddress),text->str);
+  g_string_free(text,TRUE);
+}
+
 static void my_ip_address_init(MyIPAddress*ipaddress)
 {
   MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);

@@ -56,6 +56,22 @@ enum {
 
 static guint my_ip_address_signals[LAST_SIGNAL]={0};
 
+static void my_ip_address_init(MyIPAddress*ipaddress)
+{
+  MyIPAddressPrivate *priv = MY_IP_ADDRESS_GET_PRIVATE(ipaddress);
+  for(guint i=0;i<4;i++)
+    priv->address[i]=0;
+  PangoFontDescription *fd = pango_font_description_from_string("Monospace");
+  gtk_widget_modify_font(GTK_WIDGET(ipaddress),fd);
+  my_ip_address_render(ipaddress);
+  pango_font_description_free(fd);
+
+  g_signal_connect(G_OBJECT(ipaddress),"key-press-event",
+		   G_CALLBACK(my_ip_address_key_pressed),NULL);
+  g_signal_connect(G_OBJECT(ipaddress),"notify::cursor-position",
+		   G_CALLBACK(my_ip_address_move_cursor),NULL);
+}
+
 // return a numercial value that is unique to the registered type
 GType my_ip_address_get_type(void) 
 {

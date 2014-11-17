@@ -29,26 +29,71 @@
 (defcstruct _my-ip-address-class (parent-class (g-object gtk-entry-c)))
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   ;; REGISTER signals
+  (format t "~A~%" 'class-init)
   )
 (defcallback my-ip-address-init :void ((ip-address :pointer))
   ;; REGISTER signals
+  (format t "~A~%" 'init)
   )
+
+
 ;;(foreign-type-size '_my-ip-address-class)
-#+nil
 (let ((entry-type 0))
   (defun my-ip-address-get-type ()
     (when (= 0 entry-type)
-      (cffi:with-foreign-object (info '(:struct gobject:g-type-info))
-	(setf (foreign-slot-value info :uint16 :class-size) (foreign-type-size '_my-ip-address-class)
-	      (foreign-slot-value info :pointer :class-init-fn) my-ip-address-class-init
-	      (foreign-slot-value info :pointer :instance-init-fn) my-ip-address-init)
-	      )
-	(g-type-register-static (g-type-from-name "GtkEntry")
-				"MyIPAddress"
-				info
-				0)))
+      (cffi:with-foreign-object
+       (info '(:struct gobject:g-type-info))
+       (setf (foreign-slot-value info '(:struct gobject:g-type-info) :class-size)
+	     (foreign-type-size '_my-ip-address-class)
+	     (foreign-slot-value info '(:struct gobject:g-type-info) :instance-size)
+	     (foreign-type-size '_my-ip-address)
+	     (foreign-slot-value info '(:struct gobject:g-type-info) :class-init-fn)
+	     (callback my-ip-address-class-init)
+	     (foreign-slot-value info '(:struct gobject:g-type-info) :instance-init-fn)
+	     (callback my-ip-address-init)
+	     entry-type (g-type-register-static (g-type-from-name "GtkEntry")
+						"MyIPAddress"
+						info
+						0))))
+    entry-type)
+  (defun get-entry-type ()
     entry-type))
 
+#+nil
+(g-type-register-static-simple (g-type-from-name "GtkEntry")
+			       "MyIPAddress"
+			       (foreign-type-size '_my-ip-address-class)
+			       (callback my-ip-address-class-init)
+			       (foreign-type-size '_my-ip-address)
+			       (callback my-ip-address-init)
+			       0)
+
+(let ((entry-type 0))
+  (defun my-ip-address-get-type-simple ()
+    (when (= 0 entry-type)
+      (setf entry-type
+	    (g-type-register-static-simple (g-type-from-name "GtkEntry")
+					   "MyIPAddress"
+					   (foreign-type-size '_my-ip-address-class)
+					   (callback my-ip-address-class-init)
+					   (foreign-type-size '_my-ip-address)
+					   (callback my-ip-address-init)
+					   0)))
+    entry-type)
+  (defun get-entry-type-simple ()
+    entry-type))
+
+#+nil
+(cffi:with-foreign-object
+ (info '(:struct gobject:g-type-info)
+  )
+ (foreign-slot-value info '(:struct gobject:g-type-info) :class-size)
+ )
+
+#+nil
+(my-ip-address-get-type-simple)
+#+nil
+(get-entry-type-simple)
 ;; (g-object-new (my-ip-address-get-type)
 ;;(foreign-slot-offset )
 

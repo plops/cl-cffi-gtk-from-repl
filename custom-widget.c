@@ -8,6 +8,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 
@@ -255,6 +256,7 @@ GType my_ip_address_get_type(void)
       ,0
       // value_table only used when creating fundamental types
     };
+    printf("class-size: %d, instance-size: %d\n",sizeof(MyIPAddressClass),sizeof(MyIPAddress)); 
     entry_type = g_type_register_static(GTK_TYPE_ENTRY /* parent */, 
 					"MyIPAddress"  /* type_name */,
 					&entry_info,

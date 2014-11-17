@@ -70,9 +70,9 @@
 #+nil
 (g-type-register-static-simple (gobject::%g-type-from-name "GtkEntry")
 			       "MyIPAddress"
-			       8
+			       984
 			       (callback my-ip-address-class-init)
-			       8
+			       40
 			       (callback my-ip-address-init)
 			       0)
 

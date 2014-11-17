@@ -58,13 +58,21 @@
     entry-type)
   (defun get-entry-type ()
     entry-type))
+#+nil
+(g-type-from-name "GtkEntry")
 
 #+nil
-(g-type-register-static-simple (g-type-from-name "GtkEntry")
+(gobject::%g-type-from-name "GtkEntry")
+#+nil
+(foreign-type-size '_my-ip-address-class)
+#+nil
+(foreign-type-size '_my-ip-address)
+#+nil
+(g-type-register-static-simple (gobject::%g-type-from-name "GtkEntry")
 			       "MyIPAddress"
-			       (foreign-type-size '_my-ip-address-class)
+			       8
 			       (callback my-ip-address-class-init)
-			       (foreign-type-size '_my-ip-address)
+			       8
 			       (callback my-ip-address-init)
 			       0)
 

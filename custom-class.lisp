@@ -1,6 +1,7 @@
-(eval-when (:compile-toplevel :load-toplevel :execute)
+#+nil (eval-when (:compile-toplevel :load-toplevel :execute)
   (ql:quickload :cl-cffi-gtk))
 
+#+nil
 (defpackage :custom-class
   (:use :gtk :gdk :gobject :glib :pango :cairo :cffi :iterate :cl))
 
@@ -35,6 +36,8 @@
   ;; REGISTER signals
   (format t "~A~%" 'init)
   )
+#+nil
+(defparameter *bla* (g-type-from-name "GtkEntry"))
 
 
 ;;(foreign-type-size '_my-ip-address-class)

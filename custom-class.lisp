@@ -26,8 +26,8 @@
   (let ((parent-class (g-type-class-peek-parent class) :parent-class))
     (setf (foreign-slot-value class (g-object g-object-class) :finalize) )))
 
-(defcstruct _my-ip-address (entry (g-object gtk-entry)))
-(defcstruct _my-ip-address-class (parent-class (g-object gtk-entry-c)))
+(defcstruct _my-ip-address (entry (:struct %gtk-entry)))
+(defcstruct _my-ip-address-class (parent-class (:struct %gtk-entry-class)))
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   ;; REGISTER signals
   (format t "~A~%" 'class-init)
@@ -40,7 +40,9 @@
 (defparameter *bla* (g-type-from-name "GtkEntry"))
 
 
-;;(foreign-type-size '_my-ip-address-class)
+
+#+nil
+(foreign-type-size '_my-ip-address-class)
 (let ((entry-type 0))
   (defun my-ip-address-get-type ()
     (when (= 0 entry-type)

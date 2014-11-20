@@ -2,11 +2,13 @@ Tutorial for GTK+ development with cl-cffi-gtk and SLIME in emacs.
 
 gtk-from-repl.lisp .. I describe my workflow and published this as a blog article on http://fourierlisp.blogspot.de/
 
-custom-widget.c, makefile .. I copied most of the code from the cited source but used gcc's lambda functions at some point.
+custom-widget.c, makefile .. This is to learn how to extend gobject classes using C.
+                             I copied most of the code from the cited source but used gcc's lambda functions at some point.
+			     Now I realize that GTK programs for C need enormous amounts of boiler plate.
 
 
 custom-widget.asd
 package.lisp
-gtk-grovel.lisp
+gtk-grovel.lisp      .. In order to register new classes with gobject I have to know the size of parent classes (which cl-cffi-gtk doesn't know) 
 custom-class.lisp
 test.lisp            .. load the custom-widget package. I try to get to the point where I can define gobject classes from lisp.

@@ -6,3 +6,11 @@
     #+linux #p"/home/martin/cl-cffi-gtk-from-repl/"))
 #+nil
 (asdf:load-system "custom-widget")
+
+
+(in-package :custom-class)
+
+
+(cffi:foreign-type-size '(:struct custom-class-internal::%gtk-cell-renderer))
+custom-class-internal::size-of-%gtk-cell-renderer
+

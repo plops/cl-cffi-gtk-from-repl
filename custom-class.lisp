@@ -71,6 +71,8 @@
 #+nil
 (foreign-type-size '_my-ip-address)
 #+nil
+(foreign-type-size custom-class-internal: %gtk-entry)
+#+nil
 (g-type-register-static-simple (gobject::%g-type-from-name "GtkEntry")
 			       "MyIPAddress"
 			       984

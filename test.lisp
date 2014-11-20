@@ -11,6 +11,6 @@
 (in-package :custom-class)
 
 
-(cffi:foreign-type-size '(:struct custom-class-internal::%gtk-cell-renderer))
-custom-class-internal::size-of-%gtk-cell-renderer
+(cffi:foreign-type-size '(:struct %gtk-cell-renderer))
+custom-class:size-of-%gtk-cell-renderer
 

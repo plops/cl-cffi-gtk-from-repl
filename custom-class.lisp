@@ -73,6 +73,8 @@
 #+nil
 (foreign-type-size custom-class-internal: %gtk-entry)
 #+nil
+(cffi:foreign-type-size '(:struct %gtk-cell-renderer))
+#+nil
 (g-type-register-static-simple (gobject::%g-type-from-name "GtkEntry")
 			       "MyIPAddress"
 			       984
@@ -80,6 +82,8 @@
 			       40
 			       (callback my-ip-address-init)
 			       0)
+
+
 
 (let ((entry-type 0))
   (defun my-ip-address-get-type-simple ()

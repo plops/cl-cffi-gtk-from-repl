@@ -14,9 +14,9 @@
   (format t "~A~%" 'init)
   )
 
-(let ((entry-type 0))
+(let ((entry-type nil))
   (defun my-ip-address-get-type-simple ()
-    (when (= 0 entry-type)
+    (unless entry-type
       (setf entry-type
 	    (g-type-register-static-simple (g-type-from-name "GtkEntry")
 					   "MyIPAddress"

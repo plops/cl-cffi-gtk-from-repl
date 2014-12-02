@@ -30,4 +30,8 @@
 #+nil
 (my-ip-address-get-type-simple)
 
+(defun my-ip-address-new ()
+  (g-object-new "MyIPAddress"))
 
+#+nil
+(defparameter *bla* (my-ip-address-new))

@@ -1,4 +1,5 @@
 // http://scentric.net/tutorial/sec-custom-cell-renderers.html
+// this is from chapter 11 in andrew krauses GTK book
 #include <gtk/gtk.h>
 
 #include <glib.h>

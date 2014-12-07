@@ -33,10 +33,10 @@ struct _MyIPAddressClass {
 };
 
 
-GType my_ip_address_get_type (void) G_GNUC_CONST;
-GtkWidget* my_ip_address_new(void);
-gchar* my_ip_address_get_address(MyIPAddress *ipaddress);
-void my_ip_address_set_address(MyIPAddress*ipaddress,gint address[4]);
+/* public */ GType my_ip_address_get_type (void) G_GNUC_CONST;
+/* public */ GtkWidget* my_ip_address_new(void);
+/* public */ gchar* my_ip_address_get_address(MyIPAddress *ipaddress);
+/* public */ void my_ip_address_set_address(MyIPAddress*ipaddress,gint address[4]);
 
 
 #define MY_IP_ADDRESS_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj),MY_IP_ADDRESS_TYPE,MyIPAddressPrivate))

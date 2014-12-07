@@ -3,6 +3,15 @@
 ;; http://scentric.net/tutorial/sec-custom-cell-renderers.html
 
 
+;; gtk-entry child in my-ip-address object is not a pointer but the
+;; full structure. that allows to call its signals, gtk-entry is the
+;; only child, private properties are stored in a different way using
+;; GObject. if a widget doesn't need to react to changes of a
+;; variable, it can be placed into this public widget structure.
+
+;; each of the four numbers of the ip address is defined as a widget
+;; property. the signal "ip-changed" is called when the address is
+;; successfully changed
 (defcstruct _my-ip-address (entry (:struct %gtk-entry)))
 (defcstruct _my-ip-address-class (parent-class (:struct %gtk-entry-class)))
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))

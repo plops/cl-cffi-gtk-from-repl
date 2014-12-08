@@ -30,6 +30,18 @@
  ;;  19 page faults
  ;;  6,065,057,760 bytes consed
 
+;; on acer-gpu Intel(R) Core(TM) i5-2430M CPU @ 2.40GHz
+;; Evaluation took:
+;;   46.925 seconds of real time
+;;   38.532000 seconds of total run time (37.648000 user, 0.884000 system)
+;;   [ Run times consist of 1.680 seconds GC time, and 36.852 seconds non-GC time. ]
+;;   82.11% CPU
+;;   52,901 forms interpreted
+;;   128,727 lambdas converted
+;;   112,365,232,738 processor cycles
+;;   18 page faults
+;;   6,057,826,464 bytes consed
+  
 
 ;; on new x201 (540 full fan speed)
 ;; Evaluation took:

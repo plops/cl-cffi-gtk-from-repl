@@ -18,6 +18,18 @@
   ;; 125,851,719,666 processor cycles
   ;; 19 page faults
 ;; 6,061,797,824 bytes consed1
+;; Evaluation Took:
+;;   51.863 seconds of real time
+;;   47.916000 seconds of total run time (46.664000 user, 1.252000 system)
+;;   [ Run times consist of 2.272 seconds GC time, and 45.644 seconds non-GC time. ]
+;;   92.39% CPU
+;;   52,876 forms interpreted
+;;   128,756 lambdas converted
+;;   124,160,246,631 processor cycles
+;;   19 page faults
+;;   6,064,196,800 bytes consed
+
+
 ;; full fan speed second test
  ;; Evaluation took:
  ;;  57.228 seconds of real time

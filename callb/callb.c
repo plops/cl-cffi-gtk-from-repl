@@ -14,6 +14,16 @@ static int set(T*o,int val)
 enum {N_TYPES=10};
 T*types[N_TYPES];
 
+int run_callb(T*o,void*data)
+{
+  return o->callb(o,data);
+}
+
+int run_set(T*o,int val)
+{
+  return o->set(o,val);
+}
+
 int regist(int class_id,void*callb)
 {
   if(class_id<N_TYPES){
@@ -25,6 +35,11 @@ int regist(int class_id,void*callb)
   } else {
     return -1;
   }
+}
+
+T*get_type(int class_id)
+{
+  return types[class_id];
 }
 
 int unregist(int class_id)

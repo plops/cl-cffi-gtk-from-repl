@@ -16,11 +16,13 @@
 (cffi:defcallback my-callb :int ((o (:pointer (:struct struct_t))) (data :pointer))
   (declare (ignore data))
   (format t "~A~%" 'my-callb)
-  1)
+  (cffi:foreign-slot-value o  '(:struct struct_t) 'val))
 
 #+nil
 (regist 0 (cffi:callback my-callb))
 #+nil
 (get-type 0)
-#+NIL
+#+nil
 (run-callb (get-type 0) (cffi:null-pointer))
+#+nil
+(run-set (get-type 0) 3)

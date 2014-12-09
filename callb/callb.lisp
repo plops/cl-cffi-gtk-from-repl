@@ -13,14 +13,14 @@
 (cffi:defcfun "run_set" :int  (o :pointer) (val :int))
 (cffi:defcfun "get_type" :pointer (class-id :int))
 
-(cffi:defcallback my-callb :void ((o (:pointer (:struct struct_t))) (data :pointer))
+(cffi:defcallback my-callb :int ((o (:pointer (:struct struct_t))) (data :pointer))
   (declare (ignore data))
   (format t "~A~%" 'my-callb)
   1)
 
 #+nil
-(regist 2 (cffi:callback my-callb))
+(regist 0 (cffi:callback my-callb))
 #+nil
 (get-type 0)
 #+NIL
-(run-callb (get-type 2) (cffi:null-pointer))
+(run-callb (get-type 0) (cffi:null-pointer))

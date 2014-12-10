@@ -10,3 +10,6 @@ Lisp definiert werden. In der Callbackfunktion `my-callb` kann auf die
 Variable innerhalb der Datenstruktur mit `foreign-slot-value`
 zugegriffen werden.
 
+Um die Callbackfunktion an die Initialisierungsfunktion `regist` zu
+uebergen, ermittle ich den Zeiger auf eine C-kompatible
+Trampolinfunktion mittels `callback`.

@@ -18,8 +18,11 @@
   (declare (ignore data))
   ;; REGISTER signals
   (defparameter *class-init* klass)
-  (format t "~A~%" 'class-init)
+  (format t "~A~%" (list 'class-init #+nil (foreign-slot-value klass '%gobject-class) 'set-property))
   )
+#+nil
+(foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)
+
 (defcallback my-ip-address-init :void ((ip-address :pointer))
   (declare (ignore ip-address))
   ;; REGISTER signals
@@ -44,6 +47,12 @@
 
 (defun my-ip-address-new ()
   (g-object-new "MyIPAddress"))
+
+#+nil
+(g-object-newv "MyIPAddress" 0 (cffi:null-pointer))
+
+#+nil
+(g-object-newv "GTKEntry" 0 (cffi:null-pointer))
 
 #+nil
 (defparameter *bla* (my-ip-address-new))

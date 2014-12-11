@@ -29,20 +29,31 @@
      ;; fixme more cases necessary
      )))
 
+
+(defcfun ("g-type-instance-get-private" g-type-instance-get-private)
+    :pointer
+  (instance :pointer) ;; GTypeInstance
+  (private-type g-type) ;; GType is a numerical value
+  )
+
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
 					       (value :pointer)
 					       (parameter-spec :pointer))
   ;; fixme get private ip address from object
+  (g-type-instance-get-private )
   (case prop-id
-    (*prop-ip1* (g-value-set-int value 0))))
+    (*prop-ip1* (g-value-set-int value 0))
+    ;; fixme the other cases
+    ))
 
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   ;; REGISTER signals
   (defparameter *class-init* klass)
   (format t "~A~%" (list 'class-init #+nil (foreign-slot-value klass '%gobject-class) 'set-property))
-  (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property))
+  (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
+	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
   )
 #+nil
 (foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)

@@ -39,7 +39,10 @@
   )
 
 #+nil
-(g-type-instance-get-private *class-init* (gtype-id (my-ip-address-get-type-simple)))
+(defparameter *bla2* (g-type-instance-get-private *class-init* (gtype-id (my-ip-address-get-type-simple))))
+;; gtype-id is optional
+#+nil
+(defparameter *bla3* (g-type-instance-get-private *class-init* (my-ip-address-get-type-simple)))
 
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)

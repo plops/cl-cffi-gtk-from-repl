@@ -21,13 +21,21 @@
 (defcallback my-ip-address-set-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
 					       (value :pointer)
-					       (pspec :pointer))
+					       (parameter-spec :pointer))
   (let ((address (make-array 4 :initial-element -1 :element-type 'fixnum)))
    (case prop-id
      (*prop-ip1* (setf (aref address 0) (g-value-get-int value))
 		 (my-ip-set-address object address))
      ;; fixme more cases necessary
      )))
+
+(defcallback my-ip-address-get-property :void ((object :pointer)
+					       (prop-id :unsigned-int)
+					       (value :pointer)
+					       (parameter-spec :pointer))
+  ;; fixme get private ip address from object
+  (case prop-id
+    (*prop-ip1* (g-value-set-int value 0))))
 
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))

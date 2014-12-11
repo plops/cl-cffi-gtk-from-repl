@@ -14,11 +14,27 @@
 ;; successfully changed
 (defcstruct _my-ip-address (entry (:struct %gtk-entry)))
 (defcstruct _my-ip-address-class (parent-class (:struct %gtk-entry-class)))
+(defparameter *prop-ip1* 1)
+(defparameter *prop-ip2* 2)
+(defparameter *prop-ip3* 3)
+(defparameter *prop-ip4* 4)
+(defcallback my-ip-address-set-property :void ((object :pointer)
+					       (prop-id :unsigned-int)
+					       (value :pointer)
+					       (pspec :pointer))
+  (let ((address (make-array 4 :initial-element -1 :element-type 'fixnum)))
+   (case prop-id
+     (*prop-ip1* (setf (aref address 0) (g-value-get-int value))
+		 (my-ip-set-address object address))
+     ;; fixme more cases necessary
+     )))
+
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   ;; REGISTER signals
   (defparameter *class-init* klass)
   (format t "~A~%" (list 'class-init #+nil (foreign-slot-value klass '%gobject-class) 'set-property))
+  (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property))
   )
 #+nil
 (foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)

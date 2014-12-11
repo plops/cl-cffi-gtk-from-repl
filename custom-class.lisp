@@ -32,11 +32,14 @@
      )))
 
 
-(defcfun ("g-type-instance-get-private" g-type-instance-get-private)
+(defcfun ("g_type_instance_get_private" g-type-instance-get-private)
     :pointer
   (instance :pointer) ;; GTypeInstance
   (private-type g-type) ;; GType is a numerical value
   )
+
+#+nil
+(g-type-instance-get-private *class-init* (gtype-id (my-ip-address-get-type-simple)))
 
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
@@ -81,7 +84,7 @@
     entry-type))
 
 #+nil
-(my-ip-address-get-type-simple)
+(gtype-id (my-ip-address-get-type-simple))
 
 (defun my-ip-address-new ()
   (g-object-new "MyIPAddress"))

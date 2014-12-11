@@ -14,6 +14,8 @@
 ;; successfully changed
 (defcstruct _my-ip-address (entry (:struct %gtk-entry)))
 (defcstruct _my-ip-address-class (parent-class (:struct %gtk-entry-class)))
+(defcstruct _my-ip-address-private (address :uint :count 4))
+
 (defparameter *prop-ip1* 1)
 (defparameter *prop-ip2* 2)
 (defparameter *prop-ip3* 3)
@@ -41,7 +43,7 @@
 					       (value :pointer)
 					       (parameter-spec :pointer))
   ;; fixme get private ip address from object
-  (g-type-instance-get-private )
+  ;(g-type-instance-get-private object )
   (case prop-id
     (*prop-ip1* (g-value-set-int value 0))
     ;; fixme the other cases
@@ -54,6 +56,7 @@
   (format t "~A~%" (list 'class-init #+nil (foreign-slot-value klass '%gobject-class) 'set-property))
   (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
 	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
+  (g-type-class-add-private klass (foreign-type-size '(:struct _my-ip-address-private)))
   )
 #+nil
 (foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)

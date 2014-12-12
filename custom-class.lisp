@@ -58,7 +58,13 @@
     (*prop-ip1* (g-value-set-int value 0))
     ;; fixme the other cases
     ))
-
+(defcfun ("g_cclosure_VOID__VOID" g-cclosure-void--void) :void
+  (closure :pointer)
+  (return-value :pointer)
+  (n-param-values :uint)
+  (param-values :pointer)
+  (invocation-hint :pointer) ;; gpointer is void*
+  (marshal-data :pointer))
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   ;; REGISTER signals
@@ -74,7 +80,7 @@
 									    'ip-changed)
 						       (null-pointer)
 						       (null-pointer)
-						       ;; fixme marshaller
+						       #'g-cclosure-void--void
 						       +g-type-none+
 						       0
 						       (null-pointer)))
@@ -105,10 +111,10 @@
     entry-type))
 
 #+nil
-(gtype-id (my-ip-address-get-type-simple))
+(my-ip-address-get-type-simple)
 
 (defun my-ip-address-new ()
-  (g-object-new "MyIPAddress"))
+  (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
 
 #+nil
 (g-object-newv "MyIPAddress" 0 (cffi:null-pointer))

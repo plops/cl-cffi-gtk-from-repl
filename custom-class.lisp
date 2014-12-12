@@ -79,16 +79,23 @@
   (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
 	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
   (g-type-class-add-private klass (foreign-type-size '(:struct _my-ip-address-private)))
-  (setf (aref *my-ip-address-signal* 0) (g-signal-new "ip-changed"
-						      (g-type-from-class klass)
-						      '(:run-first :action)
-						      (foreign-slot-offset '(:struct _my-ip-address-class)
-									   'ip-changed)
-						      (null-pointer)
-						      (null-pointer)
-						      (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
-						      +g-type-none+
-						      0))
+  (setf (aref *my-ip-address-signal* 0)
+	(g-signal-new "ip-changed"
+		      (g-type-from-class klass)
+		      '(:run-first :action)
+		      (foreign-slot-offset '(:struct _my-ip-address-class)
+					   'ip-changed)
+		      (null-pointer)
+		      (null-pointer)
+		      (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
+		      +g-type-none+
+		      0))
+  (g-object-class-install-property klass
+				   *prop-ip1*
+				   (g-param-spec-int "ip-number-1"
+						     "IP Address Number 1"
+						     "The first IP address number"
+						     0 255 0 '(:readable :writable)))
   (format t "signal ip-changed has been created~%"))
 
 #+nil
@@ -109,7 +116,7 @@
     (unless entry-type
       (setf entry-type
 	    (g-type-register-static-simple (g-type-from-name "GtkEntry")
-					   "MyIPAddress"
+					   "MyIPAddress2"
 					   (foreign-type-size '(:struct _my-ip-address-class))
 					   (callback my-ip-address-class-init)
 					   (foreign-type-size '(:struct _my-ip-address))
@@ -124,7 +131,8 @@
   (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
 
 #+nil
-(g-object-newv "MyIPAddress" 0 (cffi:null-pointer))
+(defparameter *bla*
+ (g-object-newv "MyIPAddress2" 0 (cffi:null-pointer)))
 
 #+nil
 (g-object-newv "GTKEntry" 0 (cffi:null-pointer))

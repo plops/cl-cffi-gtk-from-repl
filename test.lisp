@@ -4,6 +4,16 @@
 #+nil
 (time 
  (asdf:load-system "custom-widget"))
+;; on walters pc Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+;;   32.261 seconds of real time
+;;   24.064000 seconds of total run time (23.500000 user, 0.564000 system)
+;;   [ Run times consist of 1.212 seconds GC time, and 22.852 seconds non-GC time. ]
+;;   74.59% CPU
+;;   52,990 forms interpreted
+;;   128,915 lambdas converted
+;;   109,673,367,214 processor cycles
+;;   19 page faults
+;; 6,067,673,424 bytes consed
 
 ;; on my x201 (520 moderate fan speed)
   ;; 52.570 seconds of real time

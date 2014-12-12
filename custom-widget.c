@@ -194,19 +194,29 @@ my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
 
   g_type_class_add_private(klass,sizeof(MyIPAddressPrivate));
 
+  /* my_ip_address_signals[CHANGED_SIGNAL] = */
+  /*   g_signal_new("ip-changed" /\* signal-name *\/, */
+  /* 		 G_TYPE_FROM_CLASS(klass) /\* class-type *\/ , */
+  /* 		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION /\* signal-flags *\/, */
+  /* 		 // run-first .. during first emission stage */
+  /* 		 // signal-action .. can be emitted with g_signal_emit */
+  /* 		 // without pre-emission adjustments to object */
+  /* 		 G_STRUCT_OFFSET(MyIPAddressClass,ip_changed) /\* class-offset *\/, */
+  /* 		 NULL /\* accumulator *\/, */
+  /* 		 NULL /\* accumulator-data *\/ , */
+  /* 		 g_cclosure_marshal_VOID__VOID /\* c_marshaller *\/, */
+  /* 		 G_TYPE_NONE /\* return-type *\/, */
+  /* 		 0 /\* n_parameters *\/); // parameters excluding instance and user-data */
   my_ip_address_signals[CHANGED_SIGNAL] =
-    g_signal_new("ip-changed" /* signal-name */,
-		 G_TYPE_FROM_CLASS(klass) /* class-type */ ,
-		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION /* signal-flags */,
-		 // run-first .. during first emission stage
-		 // signal-action .. can be emitted with g_signal_emit
-		 // without pre-emission adjustments to object
-		 G_STRUCT_OFFSET(MyIPAddressClass,ip_changed) /* class-offset */,
-		 NULL /* accumulator */,
-		 NULL /* accumulator-data */ ,
-		 g_cclosure_marshal_VOID__VOID /* c_marshaller */,
-		 G_TYPE_NONE /* return-type */,
-		 0 /* n_parameters */); // parameters excluding instance and user-data
+    g_signal_newv("ip-changed" /* signal-name */,
+  		 G_TYPE_FROM_CLASS(klass) /* class-type */ ,
+  		 G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION /* signal-flags */,
+		  G_STRUCT_OFFSET(MyIPAddressClass,ip_changed) /* class-offset */,
+  		 NULL /* accumulator */,
+  		 NULL /* accumulator-data */ ,
+  		 g_cclosure_marshal_VOID__VOID /* c_marshaller */,
+  		 G_TYPE_NONE /* return-type */,
+  		 0 /* n_parameters */); // parameters excluding instance and user-data
 
   printf("class-offset: %ld\n", G_STRUCT_OFFSET(MyIPAddressClass,ip_changed));
   

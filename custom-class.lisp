@@ -58,13 +58,7 @@
     (*prop-ip1* (g-value-set-int value 0))
     ;; fixme the other cases
     ))
-(defcfun ("g_cclosure_VOID__VOID" g-cclosure-void--void) :void
-  (closure :pointer)
-  (return-value :pointer)
-  (n-param-values :uint)
-  (param-values :pointer)
-  (invocation-hint :pointer) ;; gpointer is void*
-  (marshal-data :pointer))
+
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   ;; REGISTER signals
@@ -76,15 +70,16 @@
   (setf (aref *my-ip-address-signal* 0) (g-signal-newv "ip-changed"
 						       (g-type-from-class klass)
 						       '(:run-first :action)
-						       (foreign-slot-offset '(:struct _my-ip-address-class)
-									    'ip-changed)
+						       (make-pointer 
+							(foreign-slot-offset '(:struct _my-ip-address-class)
+									     'ip-changed))
 						       (null-pointer)
 						       (null-pointer)
-						       #'g-cclosure-void--void
+						       (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
 						       +g-type-none+
 						       0
 						       (null-pointer)))
-  )
+  (format t "signal ip-changed has been created~%"))
 
 
 

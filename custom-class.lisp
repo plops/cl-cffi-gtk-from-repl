@@ -59,6 +59,18 @@
     ;; fixme the other cases
     ))
 
+(defcfun ("g_signal_new" g-signal-new) :uint
+  (signal-name :string)
+  (itype g-type)
+  (signal-flags g-signal-flags)
+  (class-offset :uint)
+  (accumulator :pointer)
+  (accu-data :pointer)
+  (marschaller :pointer)
+  (return-type g-type)
+  (n-params :uint)
+  &rest)
+
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   ;; REGISTER signals
@@ -67,17 +79,16 @@
   (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
 	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
   (g-type-class-add-private klass (foreign-type-size '(:struct _my-ip-address-private)))
-  (setf (aref *my-ip-address-signal* 0) (g-signal-newv "ip-changed"
-						       (g-type-from-class klass)
-						       '(:run-first :action)
-						       (foreign-slot-offset '(:struct _my-ip-address-class)
-									    'ip-changed)
-						       (null-pointer)
-						       (null-pointer)
-						       (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
-						       +g-type-none+
-						       0
-						       (null-pointer)))
+  (setf (aref *my-ip-address-signal* 0) (g-signal-new "ip-changed"
+						      (g-type-from-class klass)
+						      '(:run-first :action)
+						      (foreign-slot-offset '(:struct _my-ip-address-class)
+									   'ip-changed)
+						      (null-pointer)
+						      (null-pointer)
+						      (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
+						      +g-type-none+
+						      0))
   (format t "signal ip-changed has been created~%"))
 
 #+nil

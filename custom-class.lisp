@@ -13,7 +13,9 @@
 ;; property. the signal "ip-changed" is called when the address is
 ;; successfully changed
 (defcstruct _my-ip-address (entry (:struct %gtk-entry)))
-(defcstruct _my-ip-address-class (parent-class (:struct %gtk-entry-class)))
+(defcstruct _my-ip-address-class
+  (parent-class (:struct %gtk-entry-class))
+  (ip-changed :pointer))
 (defcstruct _my-ip-address-private (address :uint :count 4))
 
 (defparameter *prop-ip1* 1)
@@ -31,6 +33,8 @@
      ;; fixme more cases necessary
      )))
 
+(defparameter *changed-signal* 0)
+(defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))
 
 (defcfun ("g_type_instance_get_private" g-type-instance-get-private)
     :pointer
@@ -63,7 +67,21 @@
   (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
 	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
   (g-type-class-add-private klass (foreign-type-size '(:struct _my-ip-address-private)))
+  (setf (aref *my-ip-address-signal* 0) (g-signal-newv "ip-changed"
+						       (g-type-from-class klass)
+						       '(:run-first :action)
+						       (foreign-slot-offset '(:struct _my-ip-address-class)
+									    'ip-changed)
+						       (null-pointer)
+						       (null-pointer)
+						       ;; fixme marshaller
+						       +g-type-none+
+						       0
+						       (null-pointer)))
   )
+
+
+
 #+nil
 (foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)
 

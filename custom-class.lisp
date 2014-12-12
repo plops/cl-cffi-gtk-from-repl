@@ -16,7 +16,7 @@
 (defcstruct _my-ip-address-class
   (parent-class (:struct %gtk-entry-class))
   (ip-changed :pointer))
-(defcstruct _my-ip-address-private (address :uint :count 4))
+(defcstruct _my-ip-address-private (address :int :count 4))
 
 (defparameter *prop-ip1* 1)
 (defparameter *prop-ip2* 2)
@@ -52,12 +52,19 @@
 					       (prop-id :unsigned-int)
 					       (value :pointer)
 					       (parameter-spec :pointer))
-  ;; fixme get private ip address from object
-  ;(g-type-instance-get-private object )
-  (case prop-id
-    (*prop-ip1* (g-value-set-int value 0))
-    ;; fixme the other cases
-    ))
+  (let ((priv (g-type-instance-get-private object (my-ip-address-get-type-simple))))
+    (case prop-id
+      (*prop-ip1* (g-value-set-int
+		   value
+		   (mem-ref
+		    (foreign-slot-value (g-type-instance-get-private object
+								     (my-ip-address-get-type-simple))
+					'(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    0)))
+      ;; fixme the other cases
+      )))
 
 (defcfun ("g_signal_new" g-signal-new) :uint
   (signal-name :string)
@@ -139,3 +146,22 @@
 
 #+nil
 (defparameter *bla* (my-ip-address-new))
+
+(defun my-ip-address-init (ip-address)
+  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
+    (dotimes (i 4)
+      (setf (mem-ref
+		    (foreign-slot-value (g-type-instance-get-private object
+								     (my-ip-address-get-type-simple))
+					'(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    i)
+	    0))
+    (let ((fd (pango-font-description-from-string "Monospace")))
+      (gtk-widget-modify-font (foreign-funcall "g_type_check_instance_cast"
+					       ip-address
+					       (foreign-funcall "gtk-widget-get-type")
+					       ) fd))))
+#+nil
+(foreign-funcall "g_type_check_instance_cast")

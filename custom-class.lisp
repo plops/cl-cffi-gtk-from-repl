@@ -70,9 +70,8 @@
   (setf (aref *my-ip-address-signal* 0) (g-signal-newv "ip-changed"
 						       (g-type-from-class klass)
 						       '(:run-first :action)
-						       (make-pointer 
-							(foreign-slot-offset '(:struct _my-ip-address-class)
-									     'ip-changed))
+						       (foreign-slot-offset '(:struct _my-ip-address-class)
+									    'ip-changed)
 						       (null-pointer)
 						       (null-pointer)
 						       (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
@@ -81,7 +80,9 @@
 						       (null-pointer)))
   (format t "signal ip-changed has been created~%"))
 
-
+#+nil
+(foreign-slot-offset '(:struct _my-ip-address-class)
+		     'ip-changed) ; => 976 as in C
 
 #+nil
 (foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)

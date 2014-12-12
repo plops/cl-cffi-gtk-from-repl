@@ -208,6 +208,8 @@ my_ip_address_class_init(MyIPAddressClass *klass, gpointer data)
 		 G_TYPE_NONE /* return-type */,
 		 0 /* n_parameters */); // parameters excluding instance and user-data
 
+  printf("class-offset: %ld\n", G_STRUCT_OFFSET(MyIPAddressClass,ip_changed));
+  
   g_object_class_install_property
     (gobject_class, PROP_IP1,
      g_param_spec_int("ip-number-1" /* name */, "IP Address Number 1" /* nick */,

@@ -57,9 +57,7 @@
       (*prop-ip1* (g-value-set-int
 		   value
 		   (mem-ref
-		    (foreign-slot-value (g-type-instance-get-private object
-								     (my-ip-address-get-type-simple))
-					'(:struct _my-ip-address-private)
+		    (foreign-slot-value priv '(:struct _my-ip-address-private)
 		     'address)
 		    :int
 		    0)))
@@ -147,7 +145,7 @@
 #+nil
 (defparameter *bla* (my-ip-address-new))
 
-(defun my-ip-address-init (ip-address)
+#+nil (defun my-ip-address-init (ip-address)
   (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
     (dotimes (i 4)
       (setf (mem-ref
@@ -162,6 +160,25 @@
       (gtk-widget-modify-font (foreign-funcall "g_type_check_instance_cast"
 					       ip-address
 					       (foreign-funcall "gtk-widget-get-type")
-					       ) fd))))
+					       )
+			      fd)
+      (my-ip-address-render ip-address)
+      (pango-font-description-free fd))
+    #+nil
+    (g-signal-connect ip-address "key-press-event" (callback my-ip-address-key-pressed))
+    #+nil
+    (g-signal-connect ip-address "notify::cursor-position" (callback my-ip-address-move-cursor))))
+
+(defcfun ("gtk_entry_set_text" gtk-entry-set-text) :void (entry :pointer) (text :string))
+
+(defun my-ip-address-render (ip-address)
+  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
+    (let ((str (format nil "~a" (mem-ref
+				 (foreign-slot-value priv '(:struct _my-ip-address-private)
+						     'address)
+				 :int
+				 0))))
+      (gtk-entry-set-text ip-address str))))
+
 #+nil
 (foreign-funcall "g_type_check_instance_cast")

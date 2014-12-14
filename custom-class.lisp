@@ -1,5 +1,7 @@
 (in-package :custom-class)
 
+(declaim (optimize (speed 0) (safety 3) (debug 3)))
+
 ;; http://scentric.net/tutorial/sec-custom-cell-renderers.html
 
 
@@ -160,7 +162,7 @@
 
 
 (defcallback my-ip-address-move-cursor :void ((entry :pointer) ;; GObject
-					      (spec g-param-spec))
+					      (spec (:pointer g-param-spec)))
   (let ((cursor (gtk-editable-get-position entry)))
     (cond ((<= cursor 3) (gtk-editable-set-position entry 3)))))
 #+nil
@@ -172,22 +174,25 @@
 						 )
   T)
 
+(defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
+
+(defcfun ("g_type_check_instance_cast" g-type-check-instance-cast) :pointer (instance :pointer) (iface-type g-type))
+
+(defcfun ("gtk_widget_get_type" gtk-widget-get-type) g-type)
+
 (defun my-ip-address-init (ip-address)
   (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
     (dotimes (i 4)
       (setf (mem-ref
-		    (foreign-slot-value (g-type-instance-get-private object
-								     (my-ip-address-get-type-simple))
+		    (foreign-slot-value priv
 					'(:struct _my-ip-address-private)
 		     'address)
 		    :int
 		    i)
 	    0))
     (let ((fd (pango-font-description-from-string "Monospace")))
-      (gtk-widget-modify-font (foreign-funcall "g_type_check_instance_cast"
-					       ip-address
-					       (foreign-funcall "gtk-widget-get-type")
-					       )
+      (gtk-widget-modify-font (g-type-check-instance-cast  ip-address
+							   (gtk-widget-get-type))
 			      fd)
       (my-ip-address-render ip-address)
       (pango-font-description-free fd))
@@ -204,6 +209,11 @@
 			     :int
 			     i)))))
 
+(defcfun ("g_signal_emit_by_name" g-signal-emit-by-name) :void
+  (instance :pointer)
+  (detailed-signal :string)
+  &rest)
+
 (defun my-ip-address-set-address (ip-address ip)
   (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
     (format nil "~a~%" (loop for i below 4 collect
@@ -217,3 +227,5 @@
 			     (min 255 (max 0 (elt ip i)))))))
   (my-ip-address-render ip-address)
   (g-signal-emit-by-name ip-address "ip-changed"))
+
+

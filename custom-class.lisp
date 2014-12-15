@@ -239,9 +239,10 @@
 				 )))
       (g-signal-connect window "destroy" (lambda (widget)
 					   (leave-gtk-main)))
+      (my-ip-address-get-type-simple)
       (let ((ip-address (my-ip-address-new)))
 	(my-ip-address-set-address ip-address '(1 2 3 4))
-	(g-signal-connect ip-address "ip-changed"
+	#+nil (g-signal-connect ip-address "ip-changed"
 			  (lambda (ip-address)
 			    (format t "ip-changed-inmain: ~a~%"
 				    (my-ip-address-get-address ip-address))))

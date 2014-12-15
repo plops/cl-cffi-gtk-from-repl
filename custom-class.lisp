@@ -123,7 +123,7 @@
     (unless entry-type
       (setf entry-type
 	    (g-type-register-static-simple (g-type-from-name "GtkEntry")
-					   "MyIPAddress2"
+					   "MyIPAddress"
 					   (foreign-type-size '(:struct _my-ip-address-class))
 					   (callback my-ip-address-class-init)
 					   (foreign-type-size '(:struct _my-ip-address))
@@ -139,7 +139,7 @@
 
 #+nil
 (defparameter *bla*
- (g-object-newv "MyIPAddress2" 0 (cffi:null-pointer)))
+ (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
 
 #+nil
 (g-object-newv "GTKEntry" 0 (cffi:null-pointer))
@@ -228,4 +228,16 @@
   (my-ip-address-render ip-address)
   (g-signal-emit-by-name ip-address "ip-changed"))
 
+#+nil
+(sb-int:with-float-traps-masked (:divide-by-zero)
+  (within-main-loop
+    (let ((window (make-instance 'gtk-window :title "test"
+				 :default-width 480
+				 :default-height 200
+				 :border-width 12
+				 :type :toplevel
+				 )))
+      (g-signal-connect window "destroy" (lambda (widget)
+					   (leave-gtk-main)))
+      (gtk-widget-show-all window))))
 

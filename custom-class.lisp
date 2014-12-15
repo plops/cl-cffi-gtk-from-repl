@@ -31,9 +31,14 @@
   (let ((address (make-array 4 :initial-element -1 :element-type 'fixnum)))
    (case prop-id
      (*prop-ip1* (setf (aref address 0) (g-value-get-int value))
-		 (my-ip-set-address object address))
-     ;; fixme more cases necessary
-     )))
+		 (my-ip-address-set-address object address))
+     (*prop-ip2* (setf (aref address 1) (g-value-get-int value))
+		 (my-ip-address-set-address object address))
+     (*prop-ip3* (setf (aref address 2) (g-value-get-int value))
+		 (my-ip-address-set-address object address))
+     (*prop-ip4* (setf (aref address 3) (g-value-get-int value))
+		 (my-ip-address-set-address object address))
+     (otherwise (break "invalid property id.")))))
 
 (defparameter *changed-signal* 0)
 (defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))
@@ -56,8 +61,28 @@
 		     'address)
 		    :int
 		    0)))
-      ;; fixme the other cases
-      )))
+      (*prop-ip2* (g-value-set-int
+		   value
+		   (mem-ref
+		    (foreign-slot-value priv '(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    1)))
+      (*prop-ip3* (g-value-set-int
+		   value
+		   (mem-ref
+		    (foreign-slot-value priv '(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    2)))
+      (*prop-ip4* (g-value-set-int
+		   value
+		   (mem-ref
+		    (foreign-slot-value priv '(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    3)))
+      (otherwise (break "invalid property id.")))))
 
 (defcfun ("g_signal_new" g-signal-new) :uint
   (signal-name :string)
@@ -73,9 +98,8 @@
 
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
-  ;; REGISTER signals
   (defparameter *class-init* klass)
-  (format t "~A~%" (list 'class-init #+nil (foreign-slot-value klass '%gobject-class) 'set-property))
+  (format t "~A~%" (list 'class-init))
   (setf (foreign-slot-value klass '(:struct %gobject-class) 'set-property) (callback my-ip-address-set-property)
 	(foreign-slot-value klass '(:struct %gobject-class) 'get-property) (callback my-ip-address-get-property))
   (g-type-class-add-private klass (foreign-type-size '(:struct _my-ip-address-private)))
@@ -90,12 +114,17 @@
 		      (foreign-symbol-pointer "g_cclosure_marshal_VOID__VOID")
 		      +g-type-none+
 		      0))
-  (g-object-class-install-property klass
-				   *prop-ip1*
-				   (g-param-spec-int "ip-number-1"
-						     "IP Address Number 1"
-						     "The first IP address number"
-						     0 255 0 '(:readable :writable)))
+  (loop for (prop i str) in '((*prop-ip1* 1 "first")
+			      (*prop-ip2* 2 "second")
+			      (*prop-ip3* 3 "third")
+			      (*prop-ip4* 4 "fourth"))
+     do
+       (g-object-class-install-property klass
+					*prop-ip1*
+					(g-param-spec-int (format nil "ip-number-~d" i)
+							  (format nil "IP Address Number ~d" i)
+							  (format nil "The ~s IP address number" str)
+							  0 255 0 '(:readable :writable))))
   (format t "signal ip-changed has been created~%"))
 
 (defcallback my-ip-address-init :void ((ip-address :pointer))

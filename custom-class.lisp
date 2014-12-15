@@ -41,14 +41,7 @@
 (defcfun ("g_type_instance_get_private" g-type-instance-get-private)
     :pointer
   (instance :pointer) ;; GTypeInstance
-  (private-type g-type) ;; GType is a numerical value
-  )
-
-#+nil
-(defparameter *bla2* (g-type-instance-get-private *class-init* (gtype-id (my-ip-address-get-type-simple))))
-;; gtype-id is optional
-#+nil
-(defparameter *bla3* (g-type-instance-get-private *class-init* (my-ip-address-get-type-simple)))
+  (private-type g-type))
 
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
@@ -105,13 +98,6 @@
 						     0 255 0 '(:readable :writable)))
   (format t "signal ip-changed has been created~%"))
 
-#+nil
-(foreign-slot-offset '(:struct _my-ip-address-class)
-		     'ip-changed) ; => 976 as in C
-
-#+nil
-(foreign-slot-value *class-init* '(:struct %gobject-class) 'set-property)
-
 (defcallback my-ip-address-init :void ((ip-address :pointer))
   (declare (ignore ip-address))
   ;; REGISTER signals
@@ -131,23 +117,8 @@
 					   0)))
     entry-type))
 
-#+nil
-(my-ip-address-get-type-simple)
-
 (defun my-ip-address-new ()
   (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
-
-#+nil
-(defparameter *bla*
- (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
-
-#+nil
-(g-object-newv "GTKEntry" 0 (cffi:null-pointer))
-
-#+nil
-(defparameter *bla* (my-ip-address-new))
-
-
 
 (defcfun ("gtk_entry_set_text" gtk-entry-set-text) :void (entry :pointer) (text :string))
 

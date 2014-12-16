@@ -127,11 +127,39 @@
 							  0 255 0 '(:readable :writable))))
   (format t "signal ip-changed has been created~%"))
 
+(defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
+
+
 (defcallback my-ip-address-init :void ((ip-address :pointer))
-  (declare (ignore ip-address))
-  ;; REGISTER signals
-  (format t "~A~%" 'init)
-  )
+  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
+    (dotimes (i 4)
+      (setf (mem-ref
+		    (foreign-slot-value priv
+					'(:struct _my-ip-address-private)
+		     'address)
+		    :int
+		    i)
+	    0))
+    (let ((fd (pango-font-description-from-string "Monospace")))
+      (gtk-widget-modify-font (g-type-check-instance-cast  ip-address
+							   (gtk-widget-get-type))
+			      fd)
+      (my-ip-address-render ip-address)
+      #+nil (pango-font-description-free fd))
+    #+nil (g-signal-connect ip-address "key-press-event" (callback my-ip-address-key-pressed))
+    #+nil (g-signal-connect ip-address "notify::cursor-position" (callback my-ip-address-move-cursor))))
+
+(defcallback my-ip-address-move-cursor ((entry :pointer) ;; GObject
+					      (spec (:pointer g-param-spec)))
+  (let ((cursor (gtk-editable-get-position entry)))
+    (cond ((<= cursor 3) (gtk-editable-set-position entry 3)))))
+
+
+(defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
+						 (event :pointer) ; GdkEventKey
+						 )
+  T)
+
 
 (let ((entry-type nil))
   (defun my-ip-address-get-type-simple ()
@@ -161,43 +189,10 @@
       (gtk-entry-set-text ip-address str))))
 
 
-(defcallback my-ip-address-move-cursor :void ((entry :pointer) ;; GObject
-					      (spec (:pointer g-param-spec)))
-  (let ((cursor (gtk-editable-get-position entry)))
-    (cond ((<= cursor 3) (gtk-editable-set-position entry 3)))))
-#+nil
-(foreign-funcall "g_type_check_instance_cast")
-
-
-(defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
-						 (event :pointer) ; GdkEventKey
-						 )
-  T)
-
-(defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
 
 (defcfun ("g_type_check_instance_cast" g-type-check-instance-cast) :pointer (instance :pointer) (iface-type g-type))
 
 (defcfun ("gtk_widget_get_type" gtk-widget-get-type) g-type)
-
-(defun my-ip-address-init (ip-address)
-  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
-    (dotimes (i 4)
-      (setf (mem-ref
-		    (foreign-slot-value priv
-					'(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    i)
-	    0))
-    (let ((fd (pango-font-description-from-string "Monospace")))
-      (gtk-widget-modify-font (g-type-check-instance-cast  ip-address
-							   (gtk-widget-get-type))
-			      fd)
-      (my-ip-address-render ip-address)
-      (pango-font-description-free fd))
-    (g-signal-connect ip-address "key-press-event" (callback my-ip-address-key-pressed))
-    (g-signal-connect ip-address "notify::cursor-position" (callback my-ip-address-move-cursor))))
 
 (defun my-ip-address-get-address (ip-address)
   (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))

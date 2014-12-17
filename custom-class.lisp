@@ -156,14 +156,23 @@
     (%g-signal-connect-data ip-address "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
     (%g-signal-connect-data ip-address "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
 
+(defcfun ("gtk_editable_get_type" gtk-editable-get-type) g-type)
 
 (defcallback my-ip-address-move-cursor :void
     ((entry :pointer) ;; GObject
      (spec (:pointer g-param-spec)))
-  (format t "cursor moved.~%")
-  (let ((cursor (gtk-editable-get-position entry)))
-    ;; fixme this gives the error  Gtk-CRITICAL **: gtk_editable_get_position: assertion 'GTK_IS_EDITABLE (editable)' failed
-    (cond ((<= cursor 3) (gtk-editable-set-position entry 3)))))
+  
+  (let* ((ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
+	 ;; without ed this gives the error Gtk-CRITICAL **:
+	 ;; gtk_editable_get_position: assertion 'GTK_IS_EDITABLE
+	 ;; (editable)' failed
+	 (cursor (gtk-editable-get-position ed)))
+    (format t "cursor moved to ~d.~%" cursor)
+    (gtk-editable-set-position ed
+			       (cond ((<= cursor 3) 3)
+				     ((<= cursor 7) 7)
+				     ((<= cursor 11) 11)
+				     (t 15)))))
 
 
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject

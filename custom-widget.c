@@ -66,6 +66,7 @@ static guint my_ip_address_signals[LAST_SIGNAL]={0};
 static void my_ip_address_move_cursor(GObject*entry,GParamSpec*spec)
 {
   gint cursor = gtk_editable_get_position(GTK_EDITABLE(entry));
+  printf("cursor moved to %d.\n",cursor); 
   if(cursor<=3)
     gtk_editable_set_position(GTK_EDITABLE(entry),3);
   else if(cursor<=7)

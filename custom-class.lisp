@@ -130,6 +130,13 @@
 (defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
 
 
+(defcfun ("g_signal_connect_data" %g-signal-connect-data) :ulong
+  (instance :pointer)
+  (detailed-signal :string)
+  (c-handler :pointer)
+  (destroy-data :pointer) ;; fun(void*data,GClosure*closure)
+  (connect-flags gtk::connect-flags))
+
 (defcallback my-ip-address-init :void ((ip-address :pointer))
   (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
     (dotimes (i 4)
@@ -146,18 +153,23 @@
 			      fd)
       (my-ip-address-render ip-address)
       #+nil (pango-font-description-free fd))
-    #+nil (g-signal-connect ip-address "key-press-event" (callback my-ip-address-key-pressed))
-    #+nil (g-signal-connect ip-address "notify::cursor-position" (callback my-ip-address-move-cursor))))
+    (%g-signal-connect-data ip-address "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
+    (%g-signal-connect-data ip-address "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
 
-(defcallback my-ip-address-move-cursor ((entry :pointer) ;; GObject
-					      (spec (:pointer g-param-spec)))
+
+(defcallback my-ip-address-move-cursor :void
+    ((entry :pointer) ;; GObject
+     (spec (:pointer g-param-spec)))
+  (format t "cursor moved.~%")
   (let ((cursor (gtk-editable-get-position entry)))
+    ;; fixme this gives the error  Gtk-CRITICAL **: gtk_editable_get_position: assertion 'GTK_IS_EDITABLE (editable)' failed
     (cond ((<= cursor 3) (gtk-editable-set-position entry 3)))))
 
 
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
 						 (event :pointer) ; GdkEventKey
 						 )
+  (format t "key pressed.~%")
   T)
 
 

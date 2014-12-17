@@ -4,6 +4,7 @@
 #+nil
 (time 
  (asdf:load-system "custom-widget"))
+
 ;; on walters pc Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
 ;;   32.261 seconds of real time
 ;;   24.064000 seconds of total run time (23.500000 user, 0.564000 system)

@@ -149,8 +149,31 @@
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
 						 (event :pointer) ; GdkEventKey
 						 )
-  (format t "key pressed.~%")
+  (format t "key pressed ")
+  (let ((k (gdk-event-key-keyval event))
+	(ed (g-type-check-instance-cast entry (gtk-editable-get-type))))
+    (format t "~a" (list k (gdk-event-key-string event)))
+    ;; fixme keypad doesn't work
+    (cond ((<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9))
+	   (let* ((cursor (floor (gtk-editable-get-position ed) 4))
+		  (value (read-from-string (gdk-event-key-string event))))
+	     (format t " ~a" (list cursor value))))
+	  
+	  ((= k (gdk-unicode-to-keyval #\Tab)))
+	  ((= k (gdk-unicode-to-keyval #\Backspace)))
+	  ((= k (gdk-unicode-to-keyval #\Return)))))
+  (format t "~%")
+  
   T)
+
+
+
+
+
+
+
+
+
 
 
 (let ((entry-type nil))
@@ -231,4 +254,4 @@
 #+nil
 (my-ip-address-get-address *blap*)
 #+nil
-(my-ip-address-set-address *blap* '(1 1 1 100))
+(my-ip-address-set-address *blap* '(1 2 1 100))

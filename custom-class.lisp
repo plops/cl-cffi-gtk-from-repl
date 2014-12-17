@@ -52,36 +52,13 @@
 					       (prop-id :unsigned-int)
 					       (value :pointer)
 					       (parameter-spec :pointer))
-  (let ((priv (g-type-instance-get-private object (my-ip-address-get-type-simple))))
+  (let* ((priv (g-type-instance-get-private object (my-ip-address-get-type-simple)))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
     (case prop-id
-      (*prop-ip1* (g-value-set-int
-		   value
-		   (mem-ref
-		    (foreign-slot-value priv '(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    0)))
-      (*prop-ip2* (g-value-set-int
-		   value
-		   (mem-ref
-		    (foreign-slot-value priv '(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    1)))
-      (*prop-ip3* (g-value-set-int
-		   value
-		   (mem-ref
-		    (foreign-slot-value priv '(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    2)))
-      (*prop-ip4* (g-value-set-int
-		   value
-		   (mem-ref
-		    (foreign-slot-value priv '(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    3)))
+      (*prop-ip1* (g-value-set-int value (mem-ref ad :int 0)))
+      (*prop-ip2* (g-value-set-int value (mem-ref ad :int 1)))
+      (*prop-ip3* (g-value-set-int value (mem-ref ad :int 2)))
+      (*prop-ip4* (g-value-set-int value (mem-ref ad :int 3)))
       (otherwise (break "invalid property id.")))))
 
 (defcfun ("g_signal_new" g-signal-new) :uint
@@ -138,21 +115,15 @@
   (connect-flags gtk::connect-flags))
 
 (defcallback my-ip-address-init :void ((ip-address :pointer))
-  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
+  (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
     (dotimes (i 4)
-      (setf (mem-ref
-		    (foreign-slot-value priv
-					'(:struct _my-ip-address-private)
-		     'address)
-		    :int
-		    i)
-	    0))
-    (let ((fd (pango-font-description-from-string "Monospace")))
+      (setf (mem-ref ad :int i) 0))
+    (let ((fd (pango-font-description-from-string "Monospace"))) ;; fd doesn't need to be freed
       (gtk-widget-modify-font (g-type-check-instance-cast  ip-address
 							   (gtk-widget-get-type))
 			      fd)
-      (my-ip-address-render ip-address)
-      #+nil (pango-font-description-free fd))
+      (my-ip-address-render ip-address))
     (%g-signal-connect-data ip-address "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
     (%g-signal-connect-data ip-address "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
 
@@ -232,16 +203,10 @@
   &rest)
 
 (defun my-ip-address-set-address (ip-address ip)
-  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
-    (format nil "~a~%" (loop for i below 4 collect
-			    (setf
-			     (mem-ref
-			      (foreign-slot-value priv
-						  '(:struct _my-ip-address-private)
-						  'address)
-			      :int
-			      i)
-			     (min 255 (max 0 (elt ip i)))))))
+  (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
+    (format t "new address ~a~%" (loop for i below 4 collect
+			  (setf (mem-ref ad :int i) (min 255 (max 0 (elt ip i)))))))
   (my-ip-address-render ip-address)
   (g-signal-emit-by-name ip-address "ip-changed"))
 
@@ -260,7 +225,7 @@
       
       (let ((ip-address (my-ip-address-new)))
 	(defparameter *blap* ip-address)
-	(my-ip-address-set-address ip-address '(1 2 3 4))
+	(my-ip-address-set-address ip-address '(4 3 2 1))
 	#+nil (g-signal-connect ip-address "ip-changed"
 			  (lambda (ip-address)
 			    (format t "ip-changed-inmain: ~a~%"

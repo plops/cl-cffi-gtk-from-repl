@@ -38,7 +38,7 @@
 		 (my-ip-address-set-address object address))
      (*prop-ip4* (setf (aref address 3) (g-value-get-int value))
 		 (my-ip-address-set-address object address))
-     (otherwise (break "invalid property id.")))))
+     (otherwise (format t "invalid property id.")))))
 
 ;; G_OB..WARN_INVALID_PROPERTY_ID obj property_id pspec is defined as:
 
@@ -77,7 +77,7 @@
       (*prop-ip2* (g-value-set-int value (mem-aref ad :int 1)))
       (*prop-ip3* (g-value-set-int value (mem-aref ad :int 2)))
       (*prop-ip4* (g-value-set-int value (mem-aref ad :int 3)))
-      (otherwise (break "invalid property id.")))))
+      (otherwise (format t "invalid property id.")))))
 
 (defcfun ("g_signal_new" g-signal-new) :uint
   (signal-name :string)
@@ -138,21 +138,24 @@
     (dotimes (i 4)
       (setf (mem-aref ad :int i) 0))
     (let ((fd (pango-font-description-from-string "Monospace"))) ;; fd doesn't need to be freed
-      (gtk-widget-modify-font (g-type-check-instance-cast  ip-address
-							   (gtk-widget-get-type))
+      (gtk-widget-modify-font (g-type-check-instance-cast ip-address
+							  (gtk-widget-get-type))
 			      fd)
       (my-ip-address-render ip-address))
-    (%g-signal-connect-data ip-address "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
+    (%g-signal-connect-data (g-type-check-instance-cast ip-address (ash 20 2)) ;; gobject is 20<<2
+			    "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
     (%g-signal-connect-data ip-address "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
+#+nil
+(g-type-fundamental (ash 20 2))
 
 (defcfun ("gtk_editable_get_type" gtk-editable-get-type) g-type)
 
 (defcallback my-ip-address-move-cursor :void
     ((entry :pointer) ;; GObject
      (spec (:pointer g-param-spec)))
-  
+  (defparameter *blap1* entry)
   (let* ((ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
-	 ;; without ed this gives the error Gtk-CRITICAL **:
+	 ;; this still gives the error Gtk-CRITICAL **:
 	 ;; gtk_editable_get_position: assertion 'GTK_IS_EDITABLE
 	 ;; (editable)' failed
 	 (cursor (gtk-editable-get-position ed)))
@@ -168,6 +171,7 @@
 						 (event :pointer) ; GdkEventKey
 						 )
   (format t "key pressed ")
+  (defparameter *blap2* entry)
   (let ((k (gdk-event-key-keyval event))
 	(ed (g-type-check-instance-cast entry (gtk-editable-get-type))))
     (format t "~a" (list k (gdk-event-key-string event)))
@@ -183,15 +187,6 @@
   (format t "~%")
   
   T)
-
-
-
-
-
-
-
-
-
 
 
 (let ((entry-type nil))
@@ -269,6 +264,17 @@
 				    (my-ip-address-get-address ip-address))))
 	(gtk-container-add window ip-address))
       (gtk-widget-show-all window))))
+
+#+nil
+(g-type-check-instance-type *blap* (gtk-editable-get-type))
+#+nil
+(g-type-check-instance-cast *blap* (gtk-editable-get-type))
+#+nil
+(gtk-editable-get-position *blap*)
+#+nil
+(gtk-editable-get-position *blap2*)
+#+nil
+(gtk-editable-set-position *blap* 1)
 #+nil
 (my-ip-address-get-address *blap*)
 #+nil

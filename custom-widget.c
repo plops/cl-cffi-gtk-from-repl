@@ -138,7 +138,7 @@ static void my_ip_address_init(MyIPAddress*ipaddress)
   g_signal_connect(G_OBJECT(ipaddress),"key-press-event",
 		   G_CALLBACK(my_ip_address_key_pressed),NULL);
   g_signal_connect(G_OBJECT(ipaddress),"notify::cursor-position",
-		   G_CALLBACK(my_ip_address_move_cursor),NULL);
+		   G_CALLBACK(my_ip_address_move_cursor),NULL); // G_CALLBACK is a cast to void (*fun)()
 }
 
 

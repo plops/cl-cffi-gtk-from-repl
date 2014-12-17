@@ -142,11 +142,13 @@
 							  (gtk-widget-get-type))
 			      fd)
       (my-ip-address-render ip-address))
-    (%g-signal-connect-data (g-type-check-instance-cast ip-address (ash 20 2)) ;; gobject is 20<<2
-			    "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
-    (%g-signal-connect-data ip-address "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
+    (%g-signal-connect-data (verify-g-object ip-address) "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
+    (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
 #+nil
 (g-type-fundamental (ash 20 2))
+
+(defun verify-g-object (x)
+  (g-type-check-instance-cast x (ash 20 2)))
 
 (defcfun ("gtk_editable_get_type" gtk-editable-get-type) g-type)
 
@@ -274,7 +276,7 @@
 #+nil
 (gtk-editable-get-position *blap2*)
 #+nil
-(gtk-editable-set-position *blap* 1)
+(gtk-editable-set-position *blap1* 1)
 #+nil
 (my-ip-address-get-address *blap*)
 #+nil

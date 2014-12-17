@@ -40,6 +40,24 @@
 		 (my-ip-address-set-address object address))
      (otherwise (break "invalid property id.")))))
 
+;; G_OB..WARN_INVALID_PROPERTY_ID obj property_id pspec is defined as:
+
+;; G_OB..WARN_INVALID_PSPEC obj "property" property-id pspec is defined as:
+
+;; #define G_OBJECT_WARN_INVALID_PSPEC(object, pname, property_id, pspec) \
+;; G_STMT_START { \
+;;   GObject *_glib__object = (GObject*) (object); \
+;;   GParamSpec *_glib__pspec = (GParamSpec*) (pspec); \
+;;   guint _glib__property_id = (property_id); \
+;;   g_warning ("%s: invalid %s id %u for \"%s\" of type '%s' in '%s'", \
+;;              G_STRLOC, \
+;;              (pname), \
+;;              _glib__property_id, \
+;;              _glib__pspec->name, \
+;;              g_type_name (G_PARAM_SPEC_TYPE (_glib__pspec)), \
+;;              G_OBJECT_TYPE_NAME (_glib__object)); \
+;; } G_STMT_END
+
 (defparameter *changed-signal* 0)
 (defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))
 

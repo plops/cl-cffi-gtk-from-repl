@@ -201,12 +201,13 @@
 (defcfun ("gtk_entry_set_text" gtk-entry-set-text) :void (entry :pointer) (text :string))
 
 (defun my-ip-address-render (ip-address)
-  (let ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple))))
-    (let ((str (format nil "~a" (mem-ref
-				 (foreign-slot-value priv '(:struct _my-ip-address-private)
-						     'address)
-				 :int
-				 0))))
+  (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
+    (let ((str (format nil "~3d.~3d.~3d.~3d"
+		       (mem-ref ad :int 0)
+		       (mem-ref ad :int 1)
+		       (mem-ref ad :int 2)
+		       (mem-ref ad :int 3))))
       (gtk-entry-set-text ip-address str))))
 
 
@@ -256,7 +257,9 @@
       (g-signal-connect window "destroy" (lambda (widget)
 					   (leave-gtk-main)))
       (my-ip-address-get-type-simple)
+      
       (let ((ip-address (my-ip-address-new)))
+	(defparameter *blap* ip-address)
 	(my-ip-address-set-address ip-address '(1 2 3 4))
 	#+nil (g-signal-connect ip-address "ip-changed"
 			  (lambda (ip-address)
@@ -264,4 +267,7 @@
 				    (my-ip-address-get-address ip-address))))
 	(gtk-container-add window ip-address))
       (gtk-widget-show-all window))))
-
+#+nil
+(my-ip-address-get-address *blap*)
+#+nil
+(my-ip-address-set-address *blap* '(1 1 1 100))

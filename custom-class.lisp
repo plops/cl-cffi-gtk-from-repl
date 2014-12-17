@@ -45,7 +45,7 @@
 ;; G_OB..WARN_INVALID_PSPEC obj "property" property-id pspec is defined as:
 
 ;; #define G_OBJECT_WARN_INVALID_PSPEC(object, pname, property_id, pspec) \
-;; G_STMT_START { \
+;; G_STMT_START { \ ; this means: do
 ;;   GObject *_glib__object = (GObject*) (object); \
 ;;   GParamSpec *_glib__pspec = (GParamSpec*) (pspec); \
 ;;   guint _glib__property_id = (property_id); \
@@ -56,7 +56,7 @@
 ;;              _glib__pspec->name, \
 ;;              g_type_name (G_PARAM_SPEC_TYPE (_glib__pspec)), \
 ;;              G_OBJECT_TYPE_NAME (_glib__object)); \
-;; } G_STMT_END
+;; } G_STMT_END ; this means while(0)
 
 (defparameter *changed-signal* 0)
 (defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))

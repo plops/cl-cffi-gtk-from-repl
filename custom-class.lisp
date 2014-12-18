@@ -66,6 +66,11 @@
   (instance :pointer) ;; GTypeInstance
   (private-type g-type))
 
+(defcfun ("g_signal_emit_by_name" g-signal-emit-by-name) :void
+  (instance :pointer)
+  (detailed-signal :string)
+  &rest)
+
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
 					       (value :pointer)
@@ -185,7 +190,9 @@
 	 (ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
 	 (priv (g-type-instance-get-private entry (my-ip-address-get-type-simple)))
 	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
-    (cond ((<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9)) ;; fixme keypad doesn't work
+    (cond (#+nil (<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9)) ;; fixme keypad doesn't work
+		 (or (<= #x30 k #x39) ;; digit 0..9
+		     (<= #xffb0 k #xffb9)) ;; keypad digit 0..9
 	   (let* ((cursor (floor (gtk-editable-get-position ed) 4))
 		  (value (read-from-string (foreign-slot-value event '(:struct %gdk-event-key) 'string))))
 	     (format t " ~a" (list cursor value))
@@ -197,20 +204,28 @@
 	       (progn (my-ip-address-render entry)
 		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
 		      (g-signal-emit-by-name entry "ip-changed")))))
-	  ((= k (gdk-unicode-to-keyval #\Tab)) ;; move to next number or wrap around to first
+	  ((= k #xff09 #+inl (gdk-unicode-to-keyval #\Tab)
+	      ) ;; move to next number or wrap around to first
 	   (let ((cursor (1+ (floor (gtk-editable-get-position ed) 4))))
 	     (gtk-editable-set-position ed (+ 3 (* 4 (mod cursor 4))))))
-	  ((= k (gdk-unicode-to-keyval #\Backspace)) ;; integer divide by 10 to delete last digit
+	  ((= k #xff08 ;(gdk-unicode-to-keyval #\Backspace)
+	      ) ;; integer divide by 10 to delete last digit
 	   (let ((cursor (floor (gtk-editable-get-position ed) 4)))
 	     (setf (mem-aref ad :int cursor) (floor (mem-aref ad :int cursor) 10))
 	     (progn (my-ip-address-render entry)
 		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
 		      (g-signal-emit-by-name entry "ip-changed"))))
-	  ((= k (gdk-unicode-to-keyval #\Return)) ;; activate entry widget
+	  ((= k #xff0d ;(gdk-unicode-to-keyval #\Return)
+	      ) ;; activate entry widget
+	   (format t "activate widget~%")
 	   (gtk-widget-activate entry))))
   (format t "~%")
   
   T)
+
+#+nil
+(gdk-unicode-to-keyval #\Tab)
+
 #+nil
 (defcstruct )
 #+nil
@@ -258,10 +273,7 @@
     (format nil "~a~%" (loop for i below 4 collect
 			    (mem-aref ad :int i)))))
 
-(defcfun ("g_signal_emit_by_name" g-signal-emit-by-name) :void
-  (instance :pointer)
-  (detailed-signal :string)
-  &rest)
+
 
 (defun my-ip-address-set-address (ip-address ip)
   (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))

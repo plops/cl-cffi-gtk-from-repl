@@ -4,7 +4,6 @@
 
 ;; http://scentric.net/tutorial/sec-custom-cell-renderers.html
 
-
 ;; gtk-entry child in my-ip-address object is not a pointer but the
 ;; full structure. that allows to call its signals, gtk-entry is the
 ;; only child, private properties are stored in a different way using
@@ -111,7 +110,6 @@
 
 (defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
 
-
 (defcfun ("g_signal_connect_data" %g-signal-connect-data) :ulong
   (instance :pointer)
   (detailed-signal :string)
@@ -134,8 +132,6 @@
 			    (cffi:null-pointer) (cffi:null-pointer) 0)
     (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position" (callback my-ip-address-move-cursor)
 			    (cffi:null-pointer) (cffi:null-pointer) 0)))
-#+nil
-(g-type-fundamental (ash 20 2))
 
 (defun verify-g-object (x)
   (g-type-check-instance-cast x (ash 20 2)))
@@ -195,16 +191,6 @@
 	   (gtk-editable-set-position ed (+ 3 (* 4 (mod (- cursor 1) 4)))))))
   (format t "~%")
   T)
-65363
-#+nil
-(gdk-unicode-to-keyval #\Tab)
-
-#+nil
-(defcstruct )
-#+nil
-(foreign-slot-value *event* '(:struct %gdk-event-key) 'keyval)
-#+nil
-(foreign-slot-value *event* '(:struct %gdk-event-key) 'string)
 
 (let ((entry-type nil))
   (defun my-ip-address-get-type-simple ()

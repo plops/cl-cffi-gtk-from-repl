@@ -40,24 +40,6 @@
 		 (my-ip-address-set-address object address))
      (otherwise (format t "invalid property id.")))))
 
-;; G_OB..WARN_INVALID_PROPERTY_ID obj property_id pspec is defined as:
-
-;; G_OB..WARN_INVALID_PSPEC obj "property" property-id pspec is defined as:
-
-;; #define G_OBJECT_WARN_INVALID_PSPEC(object, pname, property_id, pspec) \
-;; G_STMT_START { \ ; this means: do
-;;   GObject *_glib__object = (GObject*) (object); \
-;;   GParamSpec *_glib__pspec = (GParamSpec*) (pspec); \
-;;   guint _glib__property_id = (property_id); \
-;;   g_warning ("%s: invalid %s id %u for \"%s\" of type '%s' in '%s'", \
-;;              G_STRLOC, \
-;;              (pname), \
-;;              _glib__property_id, \
-;;              _glib__pspec->name, \
-;;              g_type_name (G_PARAM_SPEC_TYPE (_glib__pspec)), \
-;;              G_OBJECT_TYPE_NAME (_glib__object)); \
-;; } G_STMT_END ; this means while(0)
-
 (defparameter *changed-signal* 0)
 (defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))
 
@@ -175,23 +157,21 @@
 				     ((<= cursor 11) 11)
 				     (t 15)))))
 
-
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
 						 (event :pointer) ; GdkEventKey
 						 )
-  (format t "key prdessed ~a " (list (foreign-slot-value event '(:struct %gdk-event-key) 'type)
+  (format t "key pressed ~a " (list (foreign-slot-value event '(:struct %gdk-event-key) 'type)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'keyval)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'length)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'string)))
   (let* ((k (foreign-slot-value event '(:struct %gdk-event-key) 'keyval))
 	 (ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
 	 (priv (g-type-instance-get-private entry (my-ip-address-get-type-simple)))
-	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
-    (cond (#+nil (<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9)) ;; fixme keypad doesn't work
-		 (or (<= #x30 k #x39) ;; digit 0..9
-		     (<= #xffb0 k #xffb9)) ;; keypad digit 0..9
-	   (let* ((cursor (floor (gtk-editable-get-position ed) 4))
-		  (value (read-from-string (foreign-slot-value event '(:struct %gdk-event-key) 'string))))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address))
+	 (cursor (floor (gtk-editable-get-position ed) 4)))
+    (cond ((or (<= #x30 k #x39)	   ;; digit 0..9
+	       (<= #xffb0 k #xffb9))	   ;; keypad digit 0..9
+	   (let* ((value (read-from-string (foreign-slot-value event '(:struct %gdk-event-key) 'string))))
 	     (format t " ~a" (list cursor value))
 	     (when (and (= 25 (mem-aref ad :int cursor)) ;; prevent entering bigger than 255
 			(< 5 value))
@@ -201,25 +181,21 @@
 	       (progn (my-ip-address-render entry)
 		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
 		      (g-signal-emit-by-name entry "ip-changed")))))
-	  ((= k #xff09 #+inl (gdk-unicode-to-keyval #\Tab)
-	      ) ;; move to next number or wrap around to first
-	   (let ((cursor (1+ (floor (gtk-editable-get-position ed) 4))))
-	     (gtk-editable-set-position ed (+ 3 (* 4 (mod cursor 4))))))
-	  ((= k #xff08 ;(gdk-unicode-to-keyval #\Backspace)
-	      ) ;; integer divide by 10 to delete last digit
-	   (let ((cursor (floor (gtk-editable-get-position ed) 4)))
-	     (setf (mem-aref ad :int cursor) (floor (mem-aref ad :int cursor) 10))
-	     (progn (my-ip-address-render entry)
-		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
-		      (g-signal-emit-by-name entry "ip-changed"))))
-	  ((= k #xff0d ;(gdk-unicode-to-keyval #\Return)
-	      ) ;; activate entry widget
+	  ((or (= k #xff09) (= k #xff53)) ;; TAB or RIGHT ARROW move to next number or wrap around to first
+	   (gtk-editable-set-position ed (+ 3 (* 4 (mod (1+ cursor) 4)))))
+	  ((= k #xff08)	;; BACKSPACE  integer divide by 10 to delete last digit
+	   (setf (mem-aref ad :int cursor) (floor (mem-aref ad :int cursor) 10))
+	   (progn (my-ip-address-render entry)
+		  (gtk-editable-set-position ed (+ (* 4 cursor) 3))
+		  (g-signal-emit-by-name entry "ip-changed")))
+	  ((= k #xff0d)	;; RETURN activate entry widget
 	   (format t "activate widget~%")
-	   (gtk-widget-activate entry))))
+	   (gtk-widget-activate entry))
+	  ((= k #xff51) ;; left arrow
+	   (gtk-editable-set-position ed (+ 3 (* 4 (mod (- cursor 1) 4)))))))
   (format t "~%")
-  
   T)
-
+65363
 #+nil
 (gdk-unicode-to-keyval #\Tab)
 

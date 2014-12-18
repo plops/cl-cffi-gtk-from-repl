@@ -7,7 +7,3 @@
 
 (in-package :custom-class)
 
-
-(cffi:foreign-type-size '(:struct %gtk-cell-renderer))
-custom-class:size-of-%gtk-cell-renderer
-

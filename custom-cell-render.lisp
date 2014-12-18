@@ -8,15 +8,27 @@
 (defcstruct _custom-cell-renderer-progress-class
   (parent (:struct %gtk-cell-renderer-class)))
 
-(defcallback custom-cell-renderer-progress-init :void (renderer :pointer)
+(defcallback custom-cell-renderer-progress-init :void ((renderer :pointer))
   (with-foreign-slots ((xpad ypad)
-		       (foreign-slot-value renderer '(:struct %gtk-cel-renderer) 'priv)
-		       '(:struct %gtk-cell-renderer-private))
+		       (foreign-slot-value renderer '(:struct %gtk-cell-renderer) 'priv)
+		       (:struct %gtk-cell-renderer-private))
     (setf xpad 2
 	  ypad 2)))
 
-(defcallback custom-cell-renderer-progress-init-class :void (klass :pointer)
-  )
+(defparameter *parent-class* nil)
+
+(defcallback custom-cell-renderer-progress-finalize :void ((renderer :pointer))
+  (foreign-funcall-pointer (foreign-slot-value *parent-class*
+					       '(:struct %gobject-class) 'finalize)
+			   nil
+			   :pointer renderer))
+
+
+
+(defcallback custom-cell-renderer-progress-init-class :void ((klass :pointer))
+  (setf *parent-class* (g-type-class-peek-parent klass))
+  (setf (foreign-slot-value klass '(:struct %gobject-class) 'finalize)
+	(callback custom-cell-renderer-progress-finalize)))
 
 (let ((cell-progress-type nil))
   (defun custom-cell-renderer-progress-get-type-simple ()

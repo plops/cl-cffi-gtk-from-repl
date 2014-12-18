@@ -7,7 +7,10 @@
 
 (cstruct %gobject-class "GObjectClass"
 	 (set-property "set_property" :type :pointer)
-	 (get-property "get_property" :type :pointer))
+	 (get-property "get_property" :type :pointer)
+	 (dispose "dispose" :type :pointer)
+	 (finalize "finalize" :type :pointer) ;;void       (*finalize)                (GObject        *object);
+	 )
 (cstruct %gtk-entry "GtkEntry")
 (cstruct %gtk-entry-class "GtkEntryClass")
 (cstruct %gtk-cell-renderer-private "GtkCellRendererPrivate"

@@ -175,7 +175,10 @@
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
 						 (event :pointer) ; GdkEventKey
 						 )
-  (format t "key prdessed ")
+  (format t "key prdessed ~a " (list (foreign-slot-value event '(:struct %gdk-event-key) 'type)
+				     (foreign-slot-value event '(:struct %gdk-event-key) 'keyval)
+				     (foreign-slot-value event '(:struct %gdk-event-key) 'length)
+				     (foreign-slot-value event '(:struct %gdk-event-key) 'string)))
   (defparameter *blap2* entry)
   (defparameter *event* event)
   #+nil

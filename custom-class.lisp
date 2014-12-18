@@ -163,7 +163,6 @@
 (defcallback my-ip-address-move-cursor :void
     ((entry :pointer) ;; GObject
      (spec (:pointer g-param-spec)))
-  (defparameter *blap1* entry)
   (let* ((ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
 	 ;; this still gives the error Gtk-CRITICAL **:
 	 ;; gtk_editable_get_position: assertion 'GTK_IS_EDITABLE
@@ -184,8 +183,6 @@
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'keyval)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'length)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'string)))
-  (defparameter *blap2* entry)
-  
   (let* ((k (foreign-slot-value event '(:struct %gdk-event-key) 'keyval))
 	 (ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
 	 (priv (g-type-instance-get-private entry (my-ip-address-get-type-simple)))
@@ -283,6 +280,10 @@
   (my-ip-address-render ip-address)
   (g-signal-emit-by-name ip-address "ip-changed"))
 
+(defcallback print-my-ip-address :void ((ip-address :pointer))
+  (format t "ip-changed-inmain: ~a~%"
+	  (my-ip-address-get-address ip-address)))
+
 #+nil
 (sb-int:with-float-traps-masked (:divide-by-zero)
   (within-main-loop
@@ -299,24 +300,10 @@
       (let ((ip-address (my-ip-address-new)))
 	(defparameter *blap* ip-address)
 	(my-ip-address-set-address ip-address '(4 3 2 1))
-	#+nil (g-signal-connect ip-address "ip-changed"
-			  (lambda (ip-address)
-			    (format t "ip-changed-inmain: ~a~%"
-				    (my-ip-address-get-address ip-address))))
+	(%g-signal-connect-data (verify-g-object ip-address) "ip-changed"
+				(callback print-my-ip-address)
+			    (cffi:null-pointer) (cffi:null-pointer) 0)
 	(gtk-container-add window ip-address))
        (gtk-widget-show-all window))))
 
-#+nil
-(g-type-check-instance-type *blap* (gtk-editable-get-type))
-#+nil
-(g-type-check-instance-cast *blap* (gtk-editable-get-type))
-#+nil
-(gtk-editable-get-position *blap*)
-#+nil
-(gtk-editable-get-position *blap2*)
-#+nil
-(gtk-editable-set-position *blap1* 1)
-#+nil
-(my-ip-address-get-address *blap*)
-#+nil
-(my-ip-address-set-address *blap* '(1 2 1 100))
+

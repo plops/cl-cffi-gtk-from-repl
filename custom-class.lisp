@@ -1,5 +1,4 @@
 (in-package :custom-class)
-;; http://scentric.net/tutorial/sec-custom-cell-renderers.html
 
 ;; gtk-entry child in my-ip-address object is not a pointer but the
 ;; full structure. that allows to call its signals, gtk-entry is the

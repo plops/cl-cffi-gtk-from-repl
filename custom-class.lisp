@@ -180,20 +180,34 @@
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'length)
 				     (foreign-slot-value event '(:struct %gdk-event-key) 'string)))
   (defparameter *blap2* entry)
-  (defparameter *event* event)
-  #+nil
-  (let ((k (gdk-event-key-keyval event))
-	(ed (g-type-check-instance-cast entry (gtk-editable-get-type))))
-    (format t "~a" (list k (gdk-event-key-string event)))
-    ;; fixme keypad doesn't work
-    (cond ((<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9))
+  
+  (let* ((k (foreign-slot-value event '(:struct %gdk-event-key) 'keyval))
+	 (ed (g-type-check-instance-cast entry (gtk-editable-get-type)))
+	 (priv (g-type-instance-get-private entry (my-ip-address-get-type-simple)))
+	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
+    (cond ((<= (gdk-unicode-to-keyval #\0) k (gdk-unicode-to-keyval #\9)) ;; fixme keypad doesn't work
 	   (let* ((cursor (floor (gtk-editable-get-position ed) 4))
-		  (value (read-from-string (gdk-event-key-string event))))
-	     (format t " ~a" (list cursor value))))
-	  
-	  ((= k (gdk-unicode-to-keyval #\Tab)))
-	  ((= k (gdk-unicode-to-keyval #\Backspace)))
-	  ((= k (gdk-unicode-to-keyval #\Return)))))
+		  (value (read-from-string (foreign-slot-value event '(:struct %gdk-event-key) 'string))))
+	     (format t " ~a" (list cursor value))
+	     (when (and (= 25 (mem-aref ad :int cursor)) ;; prevent entering bigger than 255
+			(< 5 value))
+	       (return-from my-ip-address-key-pressed T))
+	     (when (< (mem-aref ad :int cursor) 26)
+	       (setf (mem-aref ad :int cursor) (+ value (* 10 (mem-aref ad :int cursor))))
+	       (progn (my-ip-address-render entry)
+		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
+		      (g-signal-emit-by-name entry "ip-changed")))))
+	  ((= k (gdk-unicode-to-keyval #\Tab)) ;; move to next number or wrap around to first
+	   (let ((cursor (1+ (floor (gtk-editable-get-position ed) 4))))
+	     (gtk-editable-set-position ed (+ 3 (* 4 (mod cursor 4))))))
+	  ((= k (gdk-unicode-to-keyval #\Backspace)) ;; integer divide by 10 to delete last digit
+	   (let ((cursor (floor (gtk-editable-get-position ed) 4)))
+	     (setf (mem-aref ad :int cursor) (floor (mem-aref ad :int cursor) 10))
+	     (progn (my-ip-address-render entry)
+		      (gtk-editable-set-position ed (+ (* 4 cursor) 3))
+		      (g-signal-emit-by-name entry "ip-changed"))))
+	  ((= k (gdk-unicode-to-keyval #\Return)) ;; activate entry widget
+	   (gtk-widget-activate entry))))
   (format t "~%")
   
   T)

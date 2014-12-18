@@ -175,8 +175,10 @@
 (defcallback my-ip-address-key-pressed :boolean ((entry :pointer) ; GObject
 						 (event :pointer) ; GdkEventKey
 						 )
-  (format t "key pressed ")
+  (format t "key prdessed ")
   (defparameter *blap2* entry)
+  (defparameter *event* event)
+  #+nil
   (let ((k (gdk-event-key-keyval event))
 	(ed (g-type-check-instance-cast entry (gtk-editable-get-type))))
     (format t "~a" (list k (gdk-event-key-string event)))
@@ -192,7 +194,12 @@
   (format t "~%")
   
   T)
-
+#+nil
+(defcstruct )
+#+nil
+(foreign-slot-value *event* '(:struct %gdk-event-key) 'keyval)
+#+nil
+(foreign-slot-value *event* '(:struct %gdk-event-key) 'string)
 
 (let ((entry-type nil))
   (defun my-ip-address-get-type-simple ()

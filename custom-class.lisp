@@ -129,6 +129,7 @@
   (instance :pointer)
   (detailed-signal :string)
   (c-handler :pointer)
+  (data :pointer)
   (destroy-data :pointer) ;; fun(void*data,GClosure*closure)
   (connect-flags gtk::connect-flags))
 
@@ -142,8 +143,10 @@
 							  (gtk-widget-get-type))
 			      fd)
       (my-ip-address-render ip-address))
-    (%g-signal-connect-data (verify-g-object ip-address) "key-press-event" (callback my-ip-address-key-pressed) (cffi:null-pointer) 0)
-    (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position" (callback my-ip-address-move-cursor) (cffi:null-pointer) 0)))
+    (%g-signal-connect-data (verify-g-object ip-address) "key-press-event" (callback my-ip-address-key-pressed)
+			    (cffi:null-pointer) (cffi:null-pointer) 0)
+    (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position" (callback my-ip-address-move-cursor)
+			    (cffi:null-pointer) (cffi:null-pointer) 0)))
 #+nil
 (g-type-fundamental (ash 20 2))
 
@@ -265,7 +268,7 @@
 			    (format t "ip-changed-inmain: ~a~%"
 				    (my-ip-address-get-address ip-address))))
 	(gtk-container-add window ip-address))
-      (gtk-widget-show-all window))))
+       (gtk-widget-show-all window))))
 
 #+nil
 (g-type-check-instance-type *blap* (gtk-editable-get-type))

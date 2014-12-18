@@ -26,3 +26,15 @@
 
 (defcfun ("gtk_widget_get_type" gtk-widget-get-type) g-type)
 
+(defcfun ("g_signal_new" g-signal-new) :uint
+  (signal-name :string)
+  (itype g-type)
+  (signal-flags g-signal-flags)
+  (class-offset :uint)
+  (accumulator :pointer)
+  (accu-data :pointer)
+  (marschaller :pointer)
+  (return-type g-type)
+  (n-params :uint)
+  &rest)
+

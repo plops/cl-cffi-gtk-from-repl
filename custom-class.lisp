@@ -52,18 +52,6 @@
       (*prop-ip4* (g-value-set-int value (mem-aref ad :int 3)))
       (otherwise (format t "invalid property id.")))))
 
-(defcfun ("g_signal_new" g-signal-new) :uint
-  (signal-name :string)
-  (itype g-type)
-  (signal-flags g-signal-flags)
-  (class-offset :uint)
-  (accumulator :pointer)
-  (accu-data :pointer)
-  (marschaller :pointer)
-  (return-type g-type)
-  (n-params :uint)
-  &rest)
-
 (defcallback my-ip-address-class-init :void ((klass :pointer) (data (g-object gpointer)))
   (declare (ignore data))
   (defparameter *class-init* klass)

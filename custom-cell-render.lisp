@@ -9,7 +9,14 @@
   (parent (:struct %gtk-cell-renderer-class)))
 
 (defcallback custom-cell-renderer-progress-init :void (renderer :pointer)
-  (with-foreign-slots ((mode xpad ypad) renderer '(:struct %gtk-cell-renderer))))
+  (with-foreign-slots ((xpad ypad)
+		       (foreign-slot-value renderer '(:struct %gtk-cel-renderer) 'priv)
+		       '(:struct %gtk-cell-renderer-private))
+    (setf xpad 2
+	  ypad 2)))
+
+(defcallback custom-cell-renderer-progress-init-class :void (klass :pointer)
+  )
 
 (let ((cell-progress-type nil))
   (defun custom-cell-renderer-progress-get-type-simple ()

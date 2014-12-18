@@ -6,4 +6,5 @@
   :components
   ((:file "package")
    (cffi-grovel:grovel-file "gtk-grovel")
+   (:file "gtk-ffi")
    (:file "custom-class")))

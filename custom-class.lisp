@@ -1,7 +1,4 @@
 (in-package :custom-class)
-
-(declaim (optimize (speed 0) (safety 3) (debug 3)))
-
 ;; http://scentric.net/tutorial/sec-custom-cell-renderers.html
 
 ;; gtk-entry child in my-ip-address object is not a pointer but the
@@ -41,16 +38,6 @@
 
 (defparameter *changed-signal* 0)
 (defparameter *my-ip-address-signal* (make-array 1 :element-type '(unsigned-byte 64)))
-
-(defcfun ("g_type_instance_get_private" g-type-instance-get-private)
-    :pointer
-  (instance :pointer) ;; GTypeInstance
-  (private-type g-type))
-
-(defcfun ("g_signal_emit_by_name" g-signal-emit-by-name) :void
-  (instance :pointer)
-  (detailed-signal :string)
-  &rest)
 
 (defcallback my-ip-address-get-property :void ((object :pointer)
 					       (prop-id :unsigned-int)
@@ -108,16 +95,6 @@
 							  0 255 0 '(:readable :writable))))
   (format t "signal ip-changed has been created~%"))
 
-(defcfun ("pango-font-description-free" pango-font-description-free) :void (description :pointer))
-
-(defcfun ("g_signal_connect_data" %g-signal-connect-data) :ulong
-  (instance :pointer)
-  (detailed-signal :string)
-  (c-handler :pointer)
-  (data :pointer)
-  (destroy-data :pointer) ;; fun(void*data,GClosure*closure)
-  (connect-flags gtk::connect-flags))
-
 (defcallback my-ip-address-init :void ((ip-address :pointer))
   (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
 	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
@@ -128,15 +105,15 @@
 							  (gtk-widget-get-type))
 			      fd)
       (my-ip-address-render ip-address))
-    (%g-signal-connect-data (verify-g-object ip-address) "key-press-event" (callback my-ip-address-key-pressed)
+    (%g-signal-connect-data (verify-g-object ip-address) "key-press-event"
+			    (callback my-ip-address-key-pressed)
 			    (cffi:null-pointer) (cffi:null-pointer) 0)
-    (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position" (callback my-ip-address-move-cursor)
+    (%g-signal-connect-data (verify-g-object ip-address) "notify::cursor-position"
+			    (callback my-ip-address-move-cursor)
 			    (cffi:null-pointer) (cffi:null-pointer) 0)))
 
 (defun verify-g-object (x)
   (g-type-check-instance-cast x (ash 20 2)))
-
-(defcfun ("gtk_editable_get_type" gtk-editable-get-type) g-type)
 
 (defcallback my-ip-address-move-cursor :void
     ((entry :pointer) ;; GObject
@@ -208,8 +185,6 @@
 (defun my-ip-address-new ()
   (g-object-newv "MyIPAddress" 0 (cffi:null-pointer)))
 
-(defcfun ("gtk_entry_set_text" gtk-entry-set-text) :void (entry :pointer) (text :string))
-
 (defun my-ip-address-render (ip-address)
   (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
 	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
@@ -220,19 +195,11 @@
 		       (mem-aref ad :int 3))))
       (gtk-entry-set-text ip-address str))))
 
-
-
-(defcfun ("g_type_check_instance_cast" g-type-check-instance-cast) :pointer (instance :pointer) (iface-type g-type))
-
-(defcfun ("gtk_widget_get_type" gtk-widget-get-type) g-type)
-
 (defun my-ip-address-get-address (ip-address)
   (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))
 	 (ad (foreign-slot-value priv '(:struct _my-ip-address-private) 'address)))
     (format nil "~a~%" (loop for i below 4 collect
 			    (mem-aref ad :int i)))))
-
-
 
 (defun my-ip-address-set-address (ip-address ip)
   (let* ((priv (g-type-instance-get-private ip-address (my-ip-address-get-type-simple)))

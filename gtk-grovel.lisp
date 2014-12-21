@@ -28,7 +28,9 @@
 	 (priv "priv" :type :pointer) ;; GtkCellRendererPrivate
 	 )
 
-(cstruct %gtk-cell-renderer-class "GtkCellRendererClass")
+(cstruct %gtk-cell-renderer-class "GtkCellRendererClass"
+	 (get-size "get_size" :pointer)
+	 (render "render" :pointer))
 (cstruct %gtk-cell-renderer-spin "GtkCellRendererSpin")
 (cstruct %gtk-cell-renderer-spin-class "GtkCellRendererSpinClass")
 (cenum (%gdk-event-type :define-constants t)

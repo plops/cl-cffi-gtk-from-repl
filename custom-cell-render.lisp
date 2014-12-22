@@ -28,6 +28,33 @@
 
 (defparameter *prop-percentage* 1)
 
+(defcallback custom-cell-renderer-progress-get-property :void ((object :pointer)
+							       (prop-id :uint)
+							       (value :pointer)
+							       (parameter-spec :pointer))
+  (case prop-id
+    (*prop-percentage* (g-value-set-double value
+					   (slot-value (mem-ref object '(:struct _custom-cell-renderer-progress))
+						       'progress)))
+    (t (format t "invalid property id ~d." param-id))))
+
+(defcallback custom-cell-renderer-progress-set-property :void ((object :pointer)
+							       (prop-id :uint)
+							       (value :pointer)
+							       (parameter-spec :pointer))
+  (case prop-id
+    (*prop-percentage* (setf (slot-value (mem-ref object '(:struct _custom-cell-renderer-progress))
+					 'progress)
+			     (g-value-get-double value)))
+    (t (format t "invalid property id ~d." param-id))))
+
+(defun custom-cell-renderer-progress-new ()
+  (g-object-newv "CustomCellRendererProgress" 0 (cffi:null-pointer)))
+
+(defcallback custom-cell-renderer-progress-get-size :void ())
+(defcallback custom-cell-renderer-progress-render :void ())
+
+
 (defcallback custom-cell-renderer-progress-class-init :void ((klass :pointer))
   (setf *parent-class* (g-type-class-peek-parent klass))
   (with-foreign-slots ((finalize get-property set-property) klass (:struct %gobject-class))
@@ -46,14 +73,13 @@
 							(format nil "The fractional progress to display.")
 							0 1 0 '(:readable :writable))))
 
-;; fixme implement get-prop set-prop get-size render 
 
 (let ((cell-progress-type nil))
   (defun custom-cell-renderer-progress-get-type-simple ()
     (or cell-progress-type
 	(setf cell-progress-type
 	      (g-type-register-static-simple
-	       (g-type-from-name "GtkCellRenderer") "CustomCellRenderer"
+	       (g-type-from-name "GtkCellRenderer") "CustomCellRendererProgress"
 	       (foreign-type-size '(:struct _custom-cell-renderer-progress-class))
 	       (callback custom-cell-renderer-progress-class-init)
 	       (foreign-type-size '(:struct _custom-cell-renderer-progress))

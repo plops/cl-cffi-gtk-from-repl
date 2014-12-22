@@ -51,7 +51,32 @@
 (defun custom-cell-renderer-progress-new ()
   (g-object-newv "CustomCellRendererProgress" 0 (cffi:null-pointer)))
 
-(defcallback custom-cell-renderer-progress-get-size :void ())
+
+(defparameter *fixed-width* 100)
+(defparameter *fixed-height* 10)
+
+(defcallback custom-cell-renderer-progress-get-size :void ((cell :pointer)
+							   (widget :pointer)
+							   (cell-area :pointer)
+							   (x-offset (:pointer :int))
+							   (y-offset (:pointer :int))
+							   (pwidth (:pointer :int))
+							   (pheight (:pointer :int)))
+  (with-foreign-slots ((xpad ypad xalign yalign width height)
+		       (foreign-slot-value cell '(:struct %gtk-cell-renderer) 'priv)
+		       (:struct %gtk-cell-renderer-private))
+    (let ((w (+ *fixed-width* (* 2 xpad)))
+	  (h (+ *fixed-height* (* 2 ypad))))
+      (unless (null-pointer-p pwidth)
+	(setf (mem-ref pwidth :int) w))
+      (unless (null-pointer-p pheight)
+	(setf (mem-ref pheight :int) h))
+      (unless (null-pointer-p cell-area)
+	(unless (null-pointer-p x-offset)
+	  (setf (mem-ref x-offset :int) (max 0 (* xalign (- width w)))))
+	(unless (null-pointer-p y-offset)
+	  (setf (mem-ref y-offset :int) (max 0 (* yalign (- height h)))))))))
+
 (defcallback custom-cell-renderer-progress-render :void ())
 
 

@@ -1,6 +1,10 @@
 Tutorial for GTK+ development with cl-cffi-gtk and SLIME in emacs.
 
-gtk-from-repl.lisp .. I describe my workflow and published this as a blog article on http://fourierlisp.blogspot.de/
+Originally this repository started as one file gtk-from-repl.lisp but
+now it contains several more pieces of code which need to be
+documented eventually.
+
+gtk-from-repl.lisp .. I describe my workflow and published this as a blog article on http://fourierlisp.blogspot.de/. If you want to do what is described in the Blog post, just load this file.
 
 custom-widget.c, makefile .. This is to learn how to extend gobject classes using C.
                              I copied most of the code from the cited source but used gcc's lambda functions at some point.
@@ -11,4 +15,11 @@ custom-widget.asd
 package.lisp
 gtk-grovel.lisp      .. In order to register new classes with gobject I have to know the size of parent classes (which cl-cffi-gtk doesn't know) 
 custom-class.lisp
-test.lisp            .. load the custom-widget package. I try to get to the point where I can define gobject classes from lisp.
+test.lisp            .. load the custom-widget package. I can now define a new widget (to enter an ip-address) using Common Lisp (but the lisp must support cffi:defcallback)
+
+custom-cell-render.lisp .. This is my second attempt to extend GTK. This time I'm trying to define a cell renderer that displays a progress bar. This is a port of some C tutorial.
+
+
+What is my goal?
+
+Eventually, I want to have a very responsive GUI. In particular a tree view with numbers that can be changed with minimal mouse clicks.
